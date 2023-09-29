@@ -135,5 +135,5 @@ class Robot:
             diocane()
 
 r = Robot(pos=Point(0,1))
-r.line_intersects(Segment(Point(2,3), Point(-2,4)))
+r.line_intersects(Segment(Point(2,3), Point(-2,-4)))
 
