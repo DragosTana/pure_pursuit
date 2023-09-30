@@ -97,11 +97,11 @@ class Robot:
         # per debugging
         # questo codice è di prova quindi la logica di debug per ora la lascio nel flusso
         # normale di esecuzione, cambia pure sta flag, non aggiunge troppa roba
-        self.debug_in_visualization = False
+        self.debug_in_visualization = True
         self.straight_intersects = []
         self.segment_intersects = []
 
-        self.default_point = Point(0,0)
+        self.default_point = Point(-10000,-10000)
 
     def set_position(self, pos:Point):
         self.pos = pos
@@ -162,10 +162,13 @@ class Robot:
     
         plt.axis('scaled')
         plt.show()
+
+    def valid_point(self, p:Point) -> bool:
+        return (p is not self.default_point)
     
     def goal_path_search(self, path:list[Point]):
         # dati normali
-        self.last_found_index = 0 # viene modificato &Co. quindi damo a self
+        self.last_found_index = 10 # viene modificato &Co. quindi damo a self
         path = path
 
         # dati del problema vedere se esce come nell'articolo
@@ -180,7 +183,8 @@ class Robot:
             # per andare avanti (aggiunto alla cazzo canis per vedere come si evolve)
             self.pos = Point((self.pos.x + next_point.x) / 2,
                              (self.pos.y + next_point.y) / 2)
-            print(self.pos.x, " : ", self.pos.y)
+            print(self.pos.x, " : ", self.pos.y, " -- ", next_point.x, next_point.y)
+            print("last found : ", self.last_found_index)
             self.reset_debugging_info()
             
     def next_point_in(self, path)->Point:
@@ -192,8 +196,11 @@ class Robot:
         for i in range(starting_index, len(path)):
             seg = Segment(path[i], path[i + 1])
             p = self.next_in_segment(seg)
-            if p is not None: # se intersezione col segmento trovata
+            if self.valid_point(p): # se intersezione col segmento trovata
                 if seg.end.is_closer(self.pos, p):
+                    print(starting_index, " : " ,
+                          i, " : ",
+                          self.last_found_index, " : segment is failing")
                     # check per vedere se il punto trovato in questo segmento ci porta
                     # effettivamente avanti, se siamo più vicini alla fine del segmento
                     # di quanto lo sia p, allora andare da p sarebbe indetreggiare
@@ -208,14 +215,29 @@ class Robot:
                 else:
                     # abbiamo trovato il punto, siamo nel segmento tra path[i] e path[i + 1]
                     # per restare coerenti con la definizione di last_found_index si setta
+                    print(starting_index, " : ", i, " : got a good segment")
                     self.last_found_index = i
                     # e, avendo trovato il punto
                     return p
             else:
                 # intersectionFound = False
-                # fallback
+                # questo è codice di fallback
+                # non ho capito il codice dell'articolo, provo a incrementare
+                # self.last_found_index qui e prego che torni, visto che
+                # path[self.last_found_index] comunque sta indietro per invariate
+                # poi boh
+                self.last_found_index += 1
+                print(starting_index, " : ",
+                      self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
 
+        print(starting_index, " : ", self.last_found_index,
+              """
+              : I don't know how, I don't know why,
+              yesterday you told \"evado il canone rai\"
+              and all that I can see
+              is just a \"stronzo porcoddi'\"
+              """)
         return self.default_point
 
     def next_in_segment(self, seg:Segment)->Point:
