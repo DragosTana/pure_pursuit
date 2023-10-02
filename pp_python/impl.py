@@ -14,7 +14,6 @@ def add_line (path) :
     
     for i in range(0,len(path)-1):
         plt.plot([path[i][0],path[i+1][0]],[path[i][1],path[i+1][1]],color='b')
-        
         plt.axis('scaled')
         # plt.show()
 
@@ -65,6 +64,9 @@ class Point:
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y)
     
+    def __call__(self):
+        return [self.x, self.y]
+    
 # non posso mettere type hint a point dentro la classe point
 # quindi, ahime', eccoce, fa un po' schifo
 # ma tanto ste sono usate solo per is_closer()
@@ -95,17 +97,18 @@ class Segment:
                 self.min_y <= p.y <= self.max_y)
 
 class Robot:
-    def __init__(self, pos:Point, look_ahead:float = 1.0):
+    def __init__(self, pos:Point, look_ahead:float):
         self.pos = pos
         self.look_ahead = look_ahead
 
         # per debugging
         # questo codice è di prova quindi la logica di debug per ora la lascio nel flusso
         # normale di esecuzione, cambia pure sta flag, non aggiunge troppa roba
-        self.debug_in_visualization = True
+        self.debug_in_visualization = False
         self.straight_intersects = []
         self.segment_intersects = []
         self.default_point = Point(-10000,-10000)
+        self.last_found_index = 0
 
     #! NOTE: why do we need a setter for pos?
     def set_position(self, pos:Point):
@@ -313,16 +316,19 @@ class Robot:
         path_ax.legend()
         plt.show()
 
-#path_arr = [[0.0, 0.0], [0.011580143395790051, 0.6570165243709267], [0.07307496243411533, 1.2724369146199181], [0.3136756819515748, 1.7385910188236868], [0.8813313906933087, 1.9320292911046681], [1.6153051608455251, 1.9849785681091774], [2.391094224224885, 1.9878393390954208], [3.12721333474683, 1.938831731115573], [3.685011039017028, 1.7396821576569221], [3.9068092597113266, 1.275245079016133], [3.9102406525571713, 0.7136897450501469], [3.68346383786099, 0.2590283720040381], [3.1181273273535957, 0.06751996250999465], [2.3832776875784316, 0.013841087641154892], [1.5971423891000605, 0.0023698980178599423], [0.7995795475309813, 0.0003490964043320208], [0, 0]]
-path_arr = view.get_waypoints()
-path_points = [Point(arr[0], arr[1]) for arr in path_arr]
+if __name__ == "__main__":
 
-#set start position randomly near the first point
-start_pos = path_points[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
-
-r = Robot(pos=start_pos, look_ahead=8)
-r.goal_path_search(path_points)
-
-
-
-
+    path_arr = view.get_waypoints()
+    traj = [Point(arr[0], arr[1]) for arr in path_arr]
+    plot = view.ControlView(traj[0], path_arr, show_old_pos=True)
+    #set start position randomly near the first point
+    start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
+    car = Robot(pos=start_pos, look_ahead=2)
+    
+    old_pos = start_pos
+    while True:
+        goal = car.next_point_in(traj)
+        plot.refresh(start_pos, car.pos, goal, car.look_ahead)
+        car.set_position(Point((car.pos.x + goal.x)/2, 
+                               (car.pos.y + goal.y)/2))
+    plt.show()
