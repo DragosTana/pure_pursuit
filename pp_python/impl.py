@@ -1,4 +1,5 @@
 import math
+from typing import Any
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -61,6 +62,9 @@ class Point:
     def is_closer(self, closer, farther) -> bool:
         return dist_squared(self, farther) > dist_squared(self, closer)
 
+    def __add__(self, other):
+        return Point(self.x + other.x, self.y + other.y)
+    
 # non posso mettere type hint a point dentro la classe point
 # quindi, ahime', eccoce, fa un po' schifo
 # ma tanto ste sono usate solo per is_closer()
@@ -91,9 +95,9 @@ class Segment:
                 self.min_y <= p.y <= self.max_y)
 
 class Robot:
-    def __init__(self, pos:Point):
+    def __init__(self, pos:Point, look_ahead:float = 1.0):
         self.pos = pos
-        self.look_ahead = 1.0
+        self.look_ahead = look_ahead
 
         # per debugging
         # questo codice è di prova quindi la logica di debug per ora la lascio nel flusso
@@ -101,10 +105,9 @@ class Robot:
         self.debug_in_visualization = True
         self.straight_intersects = []
         self.segment_intersects = []
-
         self.default_point = Point(-10000,-10000)
 
-    #! NOTE: non so se è una buona idea avere un metodo per settare la posizione, meglio averlo nel costruttore?
+    #! NOTE: why do we need a setter for pos?
     def set_position(self, pos:Point):
         self.pos = pos
 
@@ -260,7 +263,9 @@ class Robot:
         field = plt.figure()
         # graph parameters
         xScale, yScale = (1, 1)
-        xMin, yMin, xMax, yMax = (-1, -1, 5, 3)
+        xMin, yMin, xMax, yMax = (np.min([p[0] for p in path_arr]), np.min([p[1] for p in path_arr]),
+                                  np.max([p[0] for p in path_arr]), np.max([p[1] for p in path_arr]))
+        xMin, yMin, xMax, yMax = (xMin - 1, yMin - 1, xMax + 1, yMax + 1)
 
         path_ax = field.add_axes([0,0,xScale,yScale])
 
@@ -278,12 +283,12 @@ class Robot:
         path_ax.plot([xMax,xMin],[yMax,yMax],color='black')
         
         # set grid
-        xTicks = np.arange(xMin, xMax+1, 2)
-        yTicks = np.arange(yMin, yMax+1, 2)
-        
-        path_ax.set_xticks(xTicks)
-        path_ax.set_yticks(yTicks)
-        path_ax.grid(True)
+        #xTicks = np.arange(xMin, xMax+1, 2)
+        #yTicks = np.arange(yMin, yMax+1, 2)
+        #
+        #path_ax.set_xticks(xTicks)
+        #path_ax.set_yticks(yTicks)
+        #path_ax.grid(True)
         
         path_ax.set_xlim(xMin-0.25,xMax+0.25)
         path_ax.set_ylim(yMin-0.25,yMax+0.25)
@@ -312,9 +317,10 @@ class Robot:
 path_arr = view.get_waypoints()
 path_points = [Point(arr[0], arr[1]) for arr in path_arr]
 
+#set start position randomly near the first point
+start_pos = path_points[0] + Point(np.random.uniform(-0.5, 0.5), np.random.uniform(-0.5, 0.5))
 
-r = Robot(pos=Point(0,1))
-r.look_ahead = 0.6
+r = Robot(pos=start_pos, look_ahead=8)
 r.goal_path_search(path_points)
 
 
