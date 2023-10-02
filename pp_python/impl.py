@@ -6,7 +6,6 @@ import matplotlib.animation as animation
 from IPython import display
 import view
 
-
 # roba per il disegno
 def add_line (path) : 
     for i in range (0,len(path)):
@@ -44,14 +43,12 @@ def draw_circle (x, y, r, circleColor):
         
     plt.plot(xs, ys, '-', color = circleColor)
 
-
 # roba intersezione cerchio/linea
 #! NOTE: esiste già np.sign()
 def sign(n):
     if n >= 0:
         return 1
     return -1
-
 
 class Point:
     def __init__(self, x, y):
@@ -66,7 +63,7 @@ class Point:
     
     def __call__(self):
         return [self.x, self.y]
-    
+
 # non posso mettere type hint a point dentro la classe point
 # quindi, ahime', eccoce, fa un po' schifo
 # ma tanto ste sono usate solo per is_closer()
@@ -77,7 +74,6 @@ def dist_squared(p1:Point, p2:Point) -> float:
 
 def dist(p1:Point, p2:Point) -> float:
     return math.sqrt(dist_squared(p1, p2))
-
 
 class Segment:
     def __init__(self, start:Point, end:Point):
@@ -323,7 +319,7 @@ if __name__ == "__main__":
     plot = view.ControlView(traj[0], path_arr, show_old_pos=True)
     #set start position randomly near the first point
     start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
-    car = Robot(pos=start_pos, look_ahead=2)
+    car = Robot(pos=start_pos, look_ahead = 6)
     
     old_pos = start_pos
     while True:

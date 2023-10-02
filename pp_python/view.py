@@ -61,12 +61,7 @@ class ControlView():
             plotStart = self.ax.plot(start_x, start_y, 'o',markersize = 10 , color = "black")[0]
         
         if self.show_old_pos:
-            self.old_pos.append(position)
-            if len(self.old_pos) > self.step:
-                self.old_pos.pop(0)
-            for i in range(len(self.old_pos)):
-                plot_old = self.ax.plot(self.old_pos[i].x, self.old_pos[i].y, '.',markersize = 10 , color = "blue")[0]
-        
+            plot_old_pos = self.ax.plot(position.x, position.y, '.',markersize = 10 , color = "blue")[0]
         
         plot_pos = self.ax.plot(position.x, position.y, 'o',markersize = 10 , color = "green")[0] 
         plot_goal = self.ax.plot(goal_point.x, goal_point.y, 'o',markersize = 10 , color = "red")[0]
