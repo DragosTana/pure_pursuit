@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from IPython import display
+import view
 
 
 # roba per il disegno
@@ -45,6 +46,7 @@ def draw_circle (x, y, r, circleColor):
 
 
 # roba intersezione cerchio/linea
+#! NOTE: esiste già np.sign()
 def sign(n):
     if n >= 0:
         return 1
@@ -62,10 +64,10 @@ class Point:
 # non posso mettere type hint a point dentro la classe point
 # quindi, ahime', eccoce, fa un po' schifo
 # ma tanto ste sono usate solo per is_closer()
+
 def dist_squared(p1:Point, p2:Point) -> float:
-    dx = p1.x - p2.x
-    dy = p1.y - p2.y
-    return (dx**2) + (dy ** 2)
+    dx, dy = (p1.x - p2.x), (p1.y - p2.y)
+    return np.linalg.norm([dx, dy])
 
 def dist(p1:Point, p2:Point) -> float:
     return math.sqrt(dist_squared(p1, p2))
@@ -88,7 +90,6 @@ class Segment:
         return (self.min_x <= p.x <= self.max_x and
                 self.min_y <= p.y <= self.max_y)
 
-
 class Robot:
     def __init__(self, pos:Point):
         self.pos = pos
@@ -103,6 +104,7 @@ class Robot:
 
         self.default_point = Point(-10000,-10000)
 
+    #! NOTE: non so se è una buona idea avere un metodo per settare la posizione, meglio averlo nel costruttore?
     def set_position(self, pos:Point):
         self.pos = pos
 
@@ -126,8 +128,8 @@ class Robot:
        solutions = []
        if discriminant >= 0:
            # calculate the solutions
-           sol_x1 = (D * dy + sign(dy) * dx * np.sqrt(discriminant)) / dr**2
-           sol_x2 = (D * dy - sign(dy) * dx * np.sqrt(discriminant)) / dr**2
+           sol_x1 = (D * dy + np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
+           sol_x2 = (D * dy - np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
            sol_y1 = (- D * dx + abs(dy) * np.sqrt(discriminant)) / dr**2
            sol_y2 = (- D * dx - abs(dy) * np.sqrt(discriminant)) / dr**2    
 
@@ -168,7 +170,7 @@ class Robot:
     
     def goal_path_search(self, path:list[Point]):
         # dati normali
-        self.last_found_index = 10 # viene modificato &Co. quindi damo a self
+        self.last_found_index = 0 # viene modificato &Co. quindi damo a self
         path = path
 
         # dati del problema vedere se esce come nell'articolo
@@ -232,12 +234,12 @@ class Robot:
                 return path[self.last_found_index]
 
         print(starting_index, " : ", self.last_found_index,
-              """
-              : I don't know how, I don't know why,
-              yesterday you told \"evado il canone rai\"
-              and all that I can see
-              is just a \"stronzo porcoddi'\"
-              """)
+                """
+                : I don't know how, I don't know why,
+                yesterday you told \"evado il canone rai\"
+                and all that I can see
+                is just a \"stronzo porcoddi'\"
+                """)
         return self.default_point
 
     def next_in_segment(self, seg:Segment)->Point:
@@ -306,8 +308,8 @@ class Robot:
         path_ax.legend()
         plt.show()
 
-path_arr = [[0.0, 0.0], [0.011580143395790051, 0.6570165243709267], [0.07307496243411533, 1.2724369146199181], [0.3136756819515748, 1.7385910188236868], [0.8813313906933087, 1.9320292911046681], [1.6153051608455251, 1.9849785681091774], [2.391094224224885, 1.9878393390954208], [3.12721333474683, 1.938831731115573], [3.685011039017028, 1.7396821576569221], [3.9068092597113266, 1.275245079016133], [3.9102406525571713, 0.7136897450501469], [3.68346383786099, 0.2590283720040381], [3.1181273273535957, 0.06751996250999465], [2.3832776875784316, 0.013841087641154892], [1.5971423891000605, 0.0023698980178599423], [0.7995795475309813, 0.0003490964043320208], [0, 0]]
-
+#path_arr = [[0.0, 0.0], [0.011580143395790051, 0.6570165243709267], [0.07307496243411533, 1.2724369146199181], [0.3136756819515748, 1.7385910188236868], [0.8813313906933087, 1.9320292911046681], [1.6153051608455251, 1.9849785681091774], [2.391094224224885, 1.9878393390954208], [3.12721333474683, 1.938831731115573], [3.685011039017028, 1.7396821576569221], [3.9068092597113266, 1.275245079016133], [3.9102406525571713, 0.7136897450501469], [3.68346383786099, 0.2590283720040381], [3.1181273273535957, 0.06751996250999465], [2.3832776875784316, 0.013841087641154892], [1.5971423891000605, 0.0023698980178599423], [0.7995795475309813, 0.0003490964043320208], [0, 0]]
+path_arr = view.get_waypoints()
 path_points = [Point(arr[0], arr[1]) for arr in path_arr]
 
 
