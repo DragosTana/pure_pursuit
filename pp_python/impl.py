@@ -318,7 +318,7 @@ path_arr = view.get_waypoints()
 path_points = [Point(arr[0], arr[1]) for arr in path_arr]
 
 #set start position randomly near the first point
-start_pos = path_points[0] + Point(np.random.uniform(-0.5, 0.5), np.random.uniform(-0.5, 0.5))
+start_pos = path_points[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
 
 r = Robot(pos=start_pos, look_ahead=8)
 r.goal_path_search(path_points)
