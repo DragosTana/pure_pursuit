@@ -16,24 +16,20 @@ class ClickGenerator(WaypointGenerator):
         self.scroll_sensitivity = scroll_sensitivity if scroll_sensitivity else 1
 
     def remove_last_point(self):
-
         self.x.pop()
         self.y.pop()
 
     def remove_all_points(self):
-
         del self.x[:]
         del self.y[:]
 
     def connect_ends(self):
-
         self.x.append(self.x[0])
         self.y.append(self.y[0])
 
     def generate(self):
 
         def update_plot():
-
             plt.cla()
             plt.grid()
             self.ax.plot(self.x, self.y, '-', color=self.line_colour)
@@ -44,36 +40,26 @@ class ClickGenerator(WaypointGenerator):
             self.fig.canvas.draw()
 
         def onclick(event):
-            
             if not event.xdata or not event.ydata:
                 return
-
             self.x.append(event.xdata)
             self.y.append(event.ydata)
-
             update_plot()
-
+            
         def onpress(event):
-
             func = self.onpress_dict.get(event.key)
-
             if not func:
                 return
-
             func()
             update_plot()
 
         def onscroll(event):
-
             if not self.z:
                 return
-
             elif event.button == 'up':
                 self.z[-1] += self.scroll_sensitivity
-
             elif event.button == 'down':
                 self.z[-1] -= self.scroll_sensitivity
-
             update_plot()
 
         self.fig.canvas.mpl_connect('button_press_event', onclick)

@@ -72,42 +72,42 @@ class Robot:
         self.segment_intersects = []
 
     def line_intersects(self, s:Segment) -> list[Point]:
-       x1_off = s.start.x - self.pos.x
-       y1_off = s.start.y - self.pos.y
-       x2_off = s.end.x - self.pos.x
-       y2_off = s.end.y - self.pos.y
+        x1_off = s.start.x - self.pos.x
+        y1_off = s.start.y - self.pos.y
+        x2_off = s.end.x - self.pos.x
+        y2_off = s.end.y - self.pos.y
 
-       dx = x2_off - x1_off
-       dy = y2_off - y1_off
+        dx = x2_off - x1_off
+        dy = y2_off - y1_off
 
-       dr = math.sqrt(dx**2 + dy**2)
-       D = (x1_off*y2_off) - (x2_off*y1_off)
-       discriminant = (self.look_ahead**2) * (dr**2) - D**2
+        dr = math.sqrt(dx**2 + dy**2)
+        D = (x1_off*y2_off) - (x2_off*y1_off)
+        discriminant = (self.look_ahead**2) * (dr**2) - D**2
 
-       solutions = []
-       if discriminant >= 0:
-           # calculate the solutions
-           sol_x1 = (D * dy + np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
-           sol_x2 = (D * dy - np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
-           sol_y1 = (- D * dx + abs(dy) * np.sqrt(discriminant)) / dr**2
-           sol_y2 = (- D * dx - abs(dy) * np.sqrt(discriminant)) / dr**2    
+        solutions = []
+        if discriminant >= 0:
+            # calculate the solutions
+            sol_x1 = (D * dy + np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
+            sol_x2 = (D * dy - np.sign(dy) * dx * np.sqrt(discriminant)) / dr**2
+            sol_y1 = (- D * dx + abs(dy) * np.sqrt(discriminant)) / dr**2
+            sol_y2 = (- D * dx - abs(dy) * np.sqrt(discriminant)) / dr**2    
 
-           sol1 = Point(x=sol_x1 + self.pos.x, y=sol_y1 + self.pos.y)
-           sol2 = Point(x=sol_x2 + self.pos.x, y=sol_y2 + self.pos.y)
+            sol1 = Point(x=sol_x1 + self.pos.x, y=sol_y1 + self.pos.y)
+            sol2 = Point(x=sol_x2 + self.pos.x, y=sol_y2 + self.pos.y)
 
-           self.reset_debugging_info()
-           if s.point_in_rect(sol1):
-               solutions.append(sol1)
-               self.segment_intersects.append(sol1)
-           else:
-               self.straight_intersects.append(sol1)
+            self.reset_debugging_info()
+            if s.point_in_rect(sol1):
+                solutions.append(sol1)
+                self.segment_intersects.append(sol1)
+            else:
+                self.straight_intersects.append(sol1)
 
-           if s.point_in_rect(sol2):
-               solutions.append(sol2)
-               self.segment_intersects.append(sol2)
-           else:
-               self.straight_intersects.append(sol2)
-       return solutions
+            if s.point_in_rect(sol2):
+                solutions.append(sol2)
+                self.segment_intersects.append(sol2)
+            else:
+                self.straight_intersects.append(sol2)
+        return solutions
 
     def valid_point(self, p:Point) -> bool:
         return (p is not self.default_point)
@@ -116,11 +116,6 @@ class Robot:
         # dati normali
         self.last_found_index = 0 # viene modificato &Co. quindi damo a self
         path = path
-
-        # dati del problema vedere se esce come nell'articolo
-        # self.pos = Point(1, 2.2)
-        # self.look_ahead = 0.6
-        # self.last_found_index = 4
 
         while self.last_found_index <= len(path):
             next_point = self.next_point_in(path)
@@ -150,8 +145,8 @@ class Robot:
             if self.valid_point(p): # se intersezione col segmento trovata
                 if seg.end.is_closer(self.pos, p):
                     print(starting_index, " : " ,
-                          i, " : ",
-                          self.last_found_index, " : segment is failing")
+                            i, " : ",
+                            self.last_found_index, " : segment is failing")
                     # check per vedere se il punto trovato in questo segmento ci porta
                     # effettivamente avanti, se siamo più vicini alla fine del segmento
                     # di quanto lo sia p, allora andare da p sarebbe indetreggiare
@@ -179,7 +174,7 @@ class Robot:
                 # poi boh
                 self.last_found_index = next(self.last_found_index)
                 print(starting_index, " : ",
-                      self.last_found_index, "falling back to corner")
+                        self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
 
         print(starting_index, " : ", self.last_found_index,

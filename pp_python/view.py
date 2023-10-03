@@ -8,7 +8,6 @@ import pandas as pd
 class ControlView():
     """
     Class for visualizing the control of the car
-    
     """
 
     def __init__(self, initial_pos, way_points, show_old_pos = False):
