@@ -6,50 +6,6 @@ import matplotlib.animation as animation
 from IPython import display
 import view
 
-# roba per il disegno
-def add_line (path) : 
-    for i in range (0,len(path)):
-        plt.plot(path[i][0],path[i][1],'.',color='red',markersize=10)
-    
-    for i in range(0,len(path)-1):
-        plt.plot([path[i][0],path[i+1][0]],[path[i][1],path[i+1][1]],color='b')
-        plt.axis('scaled')
-        # plt.show()
-
-def add_complicated_line (path,lineStyle,lineColor,lineLabel) :
-    for i in range (0,len(path)):
-        plt.plot(path[i][0],path[i][1],'.',color='red',markersize=10)
-        
-    for i in range(0,len(path)-1):
-        if(i == 0):
-            plt.plot([path[i][0],path[i+1][0]],[path[i][1],path[i+1][1]],lineStyle,color=lineColor,label=lineLabel)
-        else:
-            plt.plot([path[i][0],path[i+1][0]],[path[i][1],path[i+1][1]],lineStyle,color=lineColor)        
-            
-    plt.axis('scaled')
-            
-def highlight_points (points, pointColor):
-    for point in points :
-        plt.plot(point[0], point[1], '.', color = pointColor, markersize = 10)
-        
-def draw_circle (x, y, r, circleColor):
-    xs = []
-    ys = []
-    angles = np.arange(0, 2.2*np.pi, 0.2)        
-    
-    for angle in angles :
-        xs.append(r*np.cos(angle) + x)
-        ys.append(r*np.sin(angle) + y)
-        
-    plt.plot(xs, ys, '-', color = circleColor)
-
-# roba intersezione cerchio/linea
-#! NOTE: esiste già np.sign()
-def sign(n):
-    if n >= 0:
-        return 1
-    return -1
-
 class Point:
     def __init__(self, x, y):
         self.x:float = x
@@ -107,6 +63,7 @@ class Robot:
         self.last_found_index = 0
 
     #! NOTE: why do we need a setter for pos?
+    # ho fatto troppo java in vita mia, e ha avuto delle conseguenze
     def set_position(self, pos:Point):
         self.pos = pos
 
@@ -152,21 +109,6 @@ class Robot:
                self.straight_intersects.append(sol2)
        return solutions
 
-    def visualize_line_intersects(self, seg:Segment, solutions:list[Point]):
-        plt.plot([seg.start.x, seg.end.x], [seg.start.y, seg.end.y], '--', color='grey')
-        draw_circle(self.pos.x, self.pos.y, self.look_ahead, 'orange')
-    
-        if len(solutions) > 0:
-            for sol in solutions:
-                print('solution found at [{}, {}]'.format(sol.x, sol.y))
-                plt.plot([sol.x], [sol.y], '.', markersize=10, color='blue', label='sol')
-            plt.legend()
-        else:
-            print('no intersection found!')
-    
-        plt.axis('scaled')
-        plt.show()
-
     def valid_point(self, p:Point) -> bool:
         return (p is not self.default_point)
     
@@ -197,8 +139,13 @@ class Robot:
         # modificare last_found_index nel loop senza problemi
         # problemi che avremmo potuto avere se il range era definito con last_found_index
 
+        # python momento, def in def
+        # questo è solo un +1 che tiene conto del fatto che path[len(path)] è out of bounds
+        def next(i):
+            return (i+1)%len(path)
+
         for i in range(starting_index, len(path)):
-            seg = Segment(path[i], path[i + 1])
+            seg = Segment(path[i], path[next(i)])
             p = self.next_in_segment(seg)
             if self.valid_point(p): # se intersezione col segmento trovata
                 if seg.end.is_closer(self.pos, p):
@@ -214,7 +161,7 @@ class Robot:
                     # è utilizzato come fallback, qui si setta anche last_found_index in
                     # modo che il fallback funzioni, e in modo anche che poi si vada avanti
                     # dopo che il fallback ha fatto il suo corso
-                    self.last_found_index = i+1
+                    self.last_found_index = next(i)
                     continue
                 else:
                     # abbiamo trovato il punto, siamo nel segmento tra path[i] e path[i + 1]
@@ -230,7 +177,7 @@ class Robot:
                 # self.last_found_index qui e prego che torni, visto che
                 # path[self.last_found_index] comunque sta indietro per invariate
                 # poi boh
-                self.last_found_index += 1
+                self.last_found_index = next(self.last_found_index)
                 print(starting_index, " : ",
                       self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
@@ -256,62 +203,6 @@ class Robot:
         else:
             return self.default_point
 
-    def visualize_path_intersection(self, path, goal):
-        global path_arr # abbastanza del cazzo come scelta, lo so
-
-        field = plt.figure()
-        # graph parameters
-        xScale, yScale = (1, 1)
-        xMin, yMin, xMax, yMax = (np.min([p[0] for p in path_arr]), np.min([p[1] for p in path_arr]),
-                                  np.max([p[0] for p in path_arr]), np.max([p[1] for p in path_arr]))
-        xMin, yMin, xMax, yMax = (xMin - 1, yMin - 1, xMax + 1, yMax + 1)
-
-        path_ax = field.add_axes([0,0,xScale,yScale])
-
-        travelled_path = path_arr[0:self.last_found_index + 1]
-        remaining_path = path_arr[self.last_found_index:]
-        add_complicated_line(travelled_path, '--', 'brown', 'travelled')
-        add_complicated_line(remaining_path, '--', 'grey', 'remaining')
-        highlight_points(travelled_path[0:self.last_found_index], 'brown')
-        highlight_points(travelled_path[self.last_found_index:], 'grey')
-
-        # plot field
-        path_ax.plot([xMin,xMax],[yMin,yMin],color='black')
-        path_ax.plot([xMin,xMin],[yMin,yMax],color='black')
-        path_ax.plot([xMax,xMax],[yMin,yMax],color='black')
-        path_ax.plot([xMax,xMin],[yMax,yMax],color='black')
-        
-        # set grid
-        #xTicks = np.arange(xMin, xMax+1, 2)
-        #yTicks = np.arange(yMin, yMax+1, 2)
-        #
-        #path_ax.set_xticks(xTicks)
-        #path_ax.set_yticks(yTicks)
-        #path_ax.grid(True)
-        
-        path_ax.set_xlim(xMin-0.25,xMax+0.25)
-        path_ax.set_ylim(yMin-0.25,yMax+0.25)
-        
-        # plot start and end
-        path_ax.plot(path[0].x,  path[0].y, '.',color='blue',markersize=15,label='start')
-        path_ax.plot(path[-1].x, path[-1].y,'.',color='green',markersize=15,label='end')
-
-        draw_circle(self.pos.x, self.pos.y, self.look_ahead, 'orange')
-        plt.plot(self.pos.x, self.pos.y, '.', markersize=15, color='orange', label='current position')
-
-        plt.plot(goal.x, goal.y, '.', markersize=15, color='red', label='goal point')
-        add_complicated_line([[self.pos.x, self.pos.y], [goal.x, goal.y]], '-', 'black', 'look ahead distance')
-
-        if self.debug_in_visualization:
-            for s in self.straight_intersects:
-                plt.plot(s.x, s.y, '.', markersize=15, color='black', label='line')
-    
-            for s in self.segment_intersects:
-                plt.plot(s.x, s.y, '.', markersize=15, color='green', label='segment')
-
-        path_ax.legend()
-        plt.show()
-
 if __name__ == "__main__":
 
     path_arr = view.get_waypoints()
@@ -327,4 +218,3 @@ if __name__ == "__main__":
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
         car.set_position(Point((car.pos.x + goal.x)/2, 
                                (car.pos.y + goal.y)/2))
-    plt.show()
