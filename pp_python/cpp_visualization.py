@@ -15,3 +15,5 @@ def main():
         horizon = float(horizon)
         
         plot.refresh(pos, goal, horizon)
+        
+main()
