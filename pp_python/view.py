@@ -54,6 +54,9 @@ class ControlView():
         return [xs, ys]      
     
     def refresh(self, startPoint, position, goal_point, horizon):
+        """
+        Refresh the plot with the new position of the car
+        """
 
         if startPoint != None:
             start_x, start_y = startPoint()

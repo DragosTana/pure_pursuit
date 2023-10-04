@@ -211,5 +211,4 @@ if __name__ == "__main__":
     while True:
         goal = car.next_point_in(traj)
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
-        car.set_position(Point((car.pos.x + goal.x)/2, 
-                               (car.pos.y + goal.y)/2))
+        car.set_position(Point((car.pos.x + goal.x)/2, (car.pos.y + goal.y)/2))
