@@ -17,6 +17,12 @@ class Point:
     def __add__(self, other):
         return Point(self.x + other.x, self.y + other.y)
     
+    def __sub__(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def __mul__(self, other):
+        return Point(self.x * other, self.y * other)
+    
     def __call__(self):
         return [self.x, self.y]
 
@@ -211,4 +217,5 @@ if __name__ == "__main__":
     while True:
         goal = car.next_point_in(traj)
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
-        car.set_position(Point((car.pos.x + goal.x)/2, (car.pos.y + goal.y)/2))
+        l = np.random.uniform(0, 1)
+        car.set_position(car.pos + (goal - car.pos) * l)

@@ -12,7 +12,7 @@ class ControlView():
 
     def __init__(self, initial_pos, way_points, show_old_pos = False):
         self.position = initial_pos
-        self.time = 0.1
+        self.time = 0.3
         self.way_points = way_points
         self.show_old_pos = show_old_pos
         self.old_pos = []
