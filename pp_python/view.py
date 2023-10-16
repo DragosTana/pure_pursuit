@@ -89,5 +89,3 @@ if __name__ == "__main__":
     traj = get_waypoints()
     view = ControlView(traj[0], traj)
     plt.show()
-    
-        

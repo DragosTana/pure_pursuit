@@ -1,5 +1,4 @@
 #include<iostream>
-
 #include "utils.hpp"
 #include "geometry.hpp"
 

@@ -128,8 +128,7 @@ class Robot:
             self.visualize_path_intersection(path, next_point)
 
             # per andare avanti (aggiunto alla cazzo canis per vedere come si evolve)
-            self.pos = Point((self.pos.x + next_point.x) / 2,
-                             (self.pos.y + next_point.y) / 2)
+            self.pos = Point((self.pos.x + next_point.x) / 2, (self.pos.y + next_point.y) / 2)
             print(self.pos.x, " : ", self.pos.y, " -- ", next_point.x, next_point.y)
             print("last found : ", self.last_found_index)
             self.reset_debugging_info()
@@ -217,5 +216,5 @@ if __name__ == "__main__":
     while True:
         goal = car.next_point_in(traj)
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
-        l = np.random.uniform(0, 1)
+        l = np.random.uniform(0.4, 0.6)
         car.set_position(car.pos + (goal - car.pos) * l)
