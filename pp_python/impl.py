@@ -151,8 +151,8 @@ class Robot:
             if self.valid_point(p): # se intersezione col segmento trovata
                 if seg.end.is_closer(self.pos, p):
                     print(starting_index, " : " ,
-                            i, " : ",
-                            self.last_found_index, " : segment is failing")
+                          i, " : ",
+                          self.last_found_index, " : segment is failing")
                     # check per vedere se il punto trovato in questo segmento ci porta
                     # effettivamente avanti, se siamo più vicini alla fine del segmento
                     # di quanto lo sia p, allora andare da p sarebbe indetreggiare
@@ -180,11 +180,11 @@ class Robot:
                 # poi boh
                 self.last_found_index = next(self.last_found_index)
                 print(starting_index, " : ",
-                        self.last_found_index, "falling back to corner")
+                      self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
 
         print(starting_index, " : ", self.last_found_index,
-                """
+              """
                 : I don't know how, I don't know why,
                 yesterday you told \"evado il canone rai\"
                 and all that I can see
