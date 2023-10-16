@@ -2,6 +2,10 @@
 #include<iostream>
 #include<cmath>
 
+/**
+ * questo file esiste per il solo ed unico motivo che non mi andava di fare un git revert
+ * quando si stabilizza l'altro tolgo questo
+ */
 class Point {
 public:
     float x;
