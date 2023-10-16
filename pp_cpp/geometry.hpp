@@ -5,7 +5,6 @@
 #include<cmath>
 #include<iostream>
 
-
 class Point {
 public:
     double x;
