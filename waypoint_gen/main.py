@@ -13,7 +13,6 @@ def exit_handler(x, y, z):
         if z:
             writer.writerow(['x', 'y', 'z'])
             writer.writerows(zip(x, y, z))
-
         else:
             writer.writerow(['x', 'y'])
             writer.writerows(zip(x, y))
@@ -42,7 +41,6 @@ def main():
 
     except KeyboardInterrupt:
         register(exit_handler, x, y, z)
-
 
 if __name__ == '__main__':
     main()
