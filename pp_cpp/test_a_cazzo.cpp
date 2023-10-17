@@ -1,8 +1,5 @@
-#include <cmath>
-#include <cstdlib>
 #include<iostream>
 #include <thread>
-#include <limits>
 #include "utils.hpp"
 #include "geometry.hpp"
 
@@ -16,7 +13,7 @@ private:
 
     // TODO questa cosa fa cagare, ma non so come altro segnalare "non ho trovato"
     const Point error_point = Point(MAXFLOAT, MAXFLOAT);
-    const double some_threshold = 10000.0;
+    const float some_threshold = 10000;
     bool is_valid_point(const Point& p) const {
         return
             (fabs(p.x) <= some_threshold) &&
@@ -88,30 +85,24 @@ private:
             {
                 Segment segment = Segment(path[i], path[next_ind(i)]);
                 Point segment_goal = next_in_segment(segment);
-                std::cout<< "x : " << segment_goal.x
-                         << " - y : " << segment_goal.y << std::endl;
             
                 if(is_valid_point(segment_goal)) {
                     // intersection found with segment
                     if(segment.end.is_closer(position, segment_goal)) {
                         this->last_visited = next_ind(i);
-                        std::cerr<<"fucked the distance, falling back to next boi"<<std::endl;
                         continue;
                     }
                     else {
-                        std::cerr<<"distance is not fucked, so we're returning the segment intersect"<<std::endl;
                         this->last_visited = i;
                         return segment_goal;
                     }
                 }
                 else {
-                    std::cerr<<"no segment intersect found, returning next vertex"<<std::endl;
                     // no intersection found with segment
                     this->last_visited = next_ind(this->last_visited);
                     return path[this->last_visited];
                 }
             }
-        std::cerr<<"in the end : last found " << last_visited << std::endl;
         return error_point;
     }
 
@@ -121,21 +112,14 @@ private:
     }
 
 public:
-  PurePursuit(float radius, float wheel_base, const Point &position,
-              const std::vector<Point> &path)
-      : radius(radius), wheel_base(wheel_base),
-        position(position.x, position.y),
-        path(path)
-    {}
+    PurePursuit(float radius, float wheel_base, const Point& position, const std::vector<Point>& path):
+        radius(radius),
+        wheel_base(wheel_base),
+        path(path),
+        position(position.x, position.y) {}
 
     void print_status(Point goal) {
-        // per python
         std::cout<<position.x<<':'<<position.y
-                 <<':'<<goal.x<<':'<<goal.y
-                 <<':'<<radius<<std::endl;
-
-        // per noi
-        std::cerr<<position.x<<':'<<position.y
                  <<':'<<goal.x<<':'<<goal.y
                  <<':'<<radius<<std::endl;
     }
@@ -145,21 +129,40 @@ public:
             Point goal = next_in_path();
             print_status(goal);
             wee_wee_move(goal);
-            std::cin.ignore();
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+    }
+
+    /* hic sunt cohones */
+    void test_fuck() {
+        position.x = 0;
+        position.y = 0;
+        radius = 1;
+
+        std::vector<Point> pts = segment_intersections(Segment(Point(-1, 0), Point(0, 0)));
+
+        std::cout << "x:" << position.x << " - y: " << position.y << " - rad: " << radius << "\n\n";
+        for(Point p:pts) { std::cout<<"x: " << p.x << " - y: "<<p.y<<std::endl;}
+
+        position.x = 1;
+        position.y = 0;
+        radius = 1;
+
+        pts = segment_intersections(Segment(Point(0,2), Point(2,0)));
+
+        std::cout << "x:" << position.x << " - y: " << position.y << " - rad: " << radius << "\n\n";
+        for(Point p:pts) { std::cout<<"x: " << p.x << " - y: "<<p.y<<std::endl;}
     }
 };
 
-double unit_offset(double max) {
-    return max*((double)std::rand()/(double)RAND_MAX);
-}
 
 int main() {
-    std::srand(std::time(nullptr));
+    PurePursuit poop(0,0,Point(0,0), std::vector<Point>{});
+    poop.test_fuck();
+    return 0;
+
     std::vector<Point> path = load_csv("waypoints.csv");
-    PurePursuit pp(0.6, 1,
-                   Point(path[0].x + unit_offset(1), path[0].y + unit_offset(1)),
-        path);
+    PurePursuit pp(0.6, 1, Point(0,0), path);
     pp.wee_wee_path();
     return 0;
 }

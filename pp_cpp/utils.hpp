@@ -41,6 +41,7 @@ std::vector<Point> load_csv (const std::string& file_name){
     if(file.is_open()){
         //std::cout<<"file is opened"<<std::endl;
         while(getline(file, line)){
+            //std::cout<<"per puro debug " <<line<<std::endl;
             std::stringstream str(line);
             // qui si assume che il csv sia a due colonne
             getline(str, word, ',');

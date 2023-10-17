@@ -14,6 +14,6 @@ def main():
         goal = impl.Point(float(goal_x), float(goal_y))
         horizon = float(horizon)
         
-        plot.refresh(pos, goal, horizon)
+        plot.refresh(traj[0], pos, goal, horizon)
         
 main()
