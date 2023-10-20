@@ -22,6 +22,7 @@ private:
 };
 
 int main() {
+    // TO BE TUNED
     double kp = 0.1;
     double ki = 0.01;
     double kd = 0.05;
@@ -30,11 +31,11 @@ int main() {
 
     double setpoint = 100.0;
     double current_value = 50.0;
-
+    
     for (int i = 0; i < 100; ++i) {
         double output = pid_controller.Calculate(setpoint, current_value);
         current_value += output;
-        std::cout << "Iteration " << i << ": Current Value = " << current_value << std::endl;
+        std::cout << i << ":" << current_value << std::endl;
     }
 
     return 0;
