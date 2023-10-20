@@ -9,11 +9,13 @@ def main():
 
     while True:
         message = input()
+        #print(message)
         pos_x, pos_y, goal_x, goal_y, horizon = message.split(":")
         pos = impl.Point(float(pos_x), float(pos_y))
         goal = impl.Point(float(goal_x), float(goal_y))
         horizon = float(horizon)
         
         plot.refresh(traj[0], pos, goal, horizon)
+        
         
 main()

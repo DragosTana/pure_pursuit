@@ -88,8 +88,7 @@ private:
             {
                 Segment segment = Segment(path[i], path[next_ind(i)]);
                 Point segment_goal = next_in_segment(segment);
-                std::cout<< "x : " << segment_goal.x
-                         << " - y : " << segment_goal.y << std::endl;
+                // std::cout<< "x : " << segment_goal.x << " - y : " << segment_goal.y << std::endl;
             
                 if(is_valid_point(segment_goal)) {
                     // intersection found with segment
@@ -121,23 +120,22 @@ private:
     }
 
 public:
-  PurePursuit(float radius, float wheel_base, const Point &position,
-              const std::vector<Point> &path)
-      : radius(radius), wheel_base(wheel_base),
+    PurePursuit(float radius, float wheel_base, const Point &position, const std::vector<Point> &path)
+        : radius(radius), wheel_base(wheel_base),
         position(position.x, position.y),
         path(path)
     {}
 
     void print_status(Point goal) {
         // per python
-        std::cout<<position.x<<':'<<position.y
-                 <<':'<<goal.x<<':'<<goal.y
-                 <<':'<<radius<<std::endl;
+        std::cout<<position.x<<':'<<position.y 
+                <<':'<<goal.x<<':'<< goal.y 
+                <<':'<<radius<<std::endl;
 
         // per noi
         std::cerr<<position.x<<':'<<position.y
-                 <<':'<<goal.x<<':'<<goal.y
-                 <<':'<<radius<<std::endl;
+                <<':'<<goal.x<<':'<<goal.y
+                <<':'<<radius<<std::endl;
     }
 
     void wee_wee_path() {
@@ -157,8 +155,7 @@ double unit_offset(double max) {
 int main() {
     std::srand(std::time(nullptr));
     std::vector<Point> path = load_csv("waypoints.csv");
-    PurePursuit pp(0.6, 1,
-                   Point(path[0].x + unit_offset(1), path[0].y + unit_offset(1)),
+    PurePursuit pp(0.6, 1, Point(path[0].x + unit_offset(1), path[0].y + unit_offset(1)),
         path);
     pp.wee_wee_path();
     return 0;
