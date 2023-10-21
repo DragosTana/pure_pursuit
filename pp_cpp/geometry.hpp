@@ -50,8 +50,8 @@ public:
     Point start;
     Point end;
 
-    Segment(const Point& start, const Point& end):start(start.x, start.y),
-                                                  end(end.x, end.y) {}
+    Segment(const Point& start, const Point& end)
+        : start(start.x, start.y), end(end.x, end.y) {}
 
     const bool point_in_rect(const Point& p) const {
         return

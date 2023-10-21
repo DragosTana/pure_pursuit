@@ -1,3 +1,7 @@
+#########################################################################
+########## usare org-mode invece di markdown è da boomer <3 #############
+#########################################################################
+
  1. compili normale il c++
     #+begin_src bash
       # nella cartella root della repo

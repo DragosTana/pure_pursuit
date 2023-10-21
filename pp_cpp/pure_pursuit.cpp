@@ -144,9 +144,8 @@ private:
     }
 
 public:
-  PurePursuit(float radius, float wheel_base, const Point &position,
-              const std::vector<Point> &path)
-      : radius(radius), wheel_base(wheel_base),
+    PurePursuit(float radius, float wheel_base, const Point &position, const std::vector<Point> &path)
+        : radius(radius), wheel_base(wheel_base),
         position(position.x, position.y),
         path(path)
     {}
