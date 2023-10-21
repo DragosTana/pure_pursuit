@@ -21,9 +21,13 @@
 #include "geometry.hpp"
 
 int sign(int n) {
-    if(n>=0)
+  if (n) {
+      if(n > 0)
         return 1;
-    return -1;
+      else
+          return -1;
+  }
+  return 0;
 }
 
 std::vector<Point> load_csv (const std::string& file_name){

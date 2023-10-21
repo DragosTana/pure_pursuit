@@ -1,16 +1,21 @@
+#include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 #include<iostream>
+#include <string>
 #include <thread>
 #include <limits>
 #include "utils.hpp"
 #include "geometry.hpp"
 
+#define DEBUGGING 1
+
 class PurePursuit {
 private:
     int last_visited = 0; // suona decisamente meglio di last_found_index
-    float radius; 
-    float wheel_base;
+    double radius; 
+    double wheel_base;
     Point position;
     const std::vector<Point>& path;
 
@@ -42,16 +47,16 @@ private:
         if (discriminant >= 0) {
             // compute line intersections
             float sol_x1 =
-                ((D * dy) + (sign(dy) * dx) * sqrt(discriminant))
+                ((D * dy) + (sign(dy) * dx * sqrt(discriminant)))
                 / pow(dr,2);
             float sol_x2 =
-                ((D * dy) - (sign(dy) * dx) * sqrt(discriminant))
+                ((D * dy) - (sign(dy) * dx * sqrt(discriminant)))
                 / pow(dr,2);
             float sol_y1 =
-                ((- D * dx) + fabs(dy) * sqrt(discriminant))
+                (-(D * dx) + fabs(dy) * sqrt(discriminant))
                 / pow(dr,2);
             float sol_y2 =
-                ((- D * dx) - fabs(dy) * sqrt(discriminant))
+                (-(D * dx) - fabs(dy) * sqrt(discriminant))
                 / pow(dr,2);
 
             Point sol1 = Point(sol_x1 + position.x, sol_y1 + position.y);
@@ -64,6 +69,24 @@ private:
 
             if (seg.point_in_rect(sol2))
                 solutions.push_back(sol2);
+
+#ifdef DEBUGGING
+            printerr_point("segment start", seg.start);
+            printerr_point("segment end", seg.start);
+            printerr_point("solution 1", sol1);
+            printerr_point("solution 2", sol2);
+
+            std::cerr<< "==== BEGIN SOLUTIONS ===="<<std::endl;
+            if(solutions.size()) {
+                for (int i = 0; i < solutions.size(); ++i) {
+                    printerr_point("solutions[" + std::to_string(i) + "]",
+                                   solutions[i]);
+                }
+            } else {
+                std::cerr << "{no solutions}" << std::endl;
+            }
+            std::cerr<< "===== END SOLUTIONS ====="<<std::endl;
+#endif
         }
         return solutions;
     }
@@ -88,9 +111,9 @@ private:
             {
                 Segment segment = Segment(path[i], path[next_ind(i)]);
                 Point segment_goal = next_in_segment(segment);
-                std::cout<< "x : " << segment_goal.x
-                         << " - y : " << segment_goal.y << std::endl;
-            
+#ifdef DEBUGGING
+                printerr_point("segment goal", segment_goal);
+#endif
                 if(is_valid_point(segment_goal)) {
                     // intersection found with segment
                     if(segment.end.is_closer(position, segment_goal)) {
@@ -129,15 +152,19 @@ public:
     {}
 
     void print_status(Point goal) {
-        // per python
         std::cout<<position.x<<':'<<position.y
                  <<':'<<goal.x<<':'<<goal.y
                  <<':'<<radius<<std::endl;
 
-        // per noi
-        std::cerr<<position.x<<':'<<position.y
-                 <<':'<<goal.x<<':'<<goal.y
-                 <<':'<<radius<<std::endl;
+#ifdef DEBUGGING
+        printerr_point("position : ", position);
+        printerr_point("goal", goal);
+        std::cerr<<"================ [ FINE FRAME ] ================"<<std::endl;
+#endif
+    }
+
+    void printerr_point(const std::string name, const Point &p) const {
+        std::cerr<<name<< " - coorrds : "<<p.x<<':'<<p.y<<std::endl;
     }
 
     void wee_wee_path() {
@@ -145,21 +172,30 @@ public:
             Point goal = next_in_path();
             print_status(goal);
             wee_wee_move(goal);
-            std::cin.ignore();
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
     }
 };
 
-double unit_offset(double max) {
+double random_offset(double max) {
     return max*((double)std::rand()/(double)RAND_MAX);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc < 4) {
+        std::cerr << "per chiamare fai ./pp <file> <look ahead> <wheel base>"
+                  << std::endl;
+        return 1;
+    }
+    std::string waypoints_filename = argv[1];
+    double look_ahead = std::stod(argv[2]);
+    double wheel_base = std::stod(argv[3]);
+    std::vector<Point> path = load_csv(waypoints_filename);
+
     std::srand(std::time(nullptr));
-    std::vector<Point> path = load_csv("waypoints.csv");
-    PurePursuit pp(0.6, 1,
-                   Point(path[0].x + unit_offset(1), path[0].y + unit_offset(1)),
-        path);
+    Point starting_position = Point(path[0].x + random_offset(1),
+                                    path[0].y + random_offset(1));
+    PurePursuit pp(look_ahead, wheel_base, starting_position, path);
     pp.wee_wee_path();
     return 0;
 }
