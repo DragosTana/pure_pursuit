@@ -1,5 +1,15 @@
 #include <iostream>
 
+
+/*
+    PID Controller
+    
+    TODO: 
+
+        1. Implement anti-windup on integral term
+        2. Implement derivative on measurement
+*/
+
 class PIDController {
 public:
     PIDController(double kp, double ki, double kd) : kp_(kp), ki_(ki), kd_(kd), integral_(0), previous_error_(0) {}
@@ -23,9 +33,9 @@ private:
 
 int main() {
     // TO BE TUNED
-    double kp = 0.1;
-    double ki = 0.01;
-    double kd = 0.05;
+    double kp = 0.5;
+    double ki = 0;
+    double kd = 0;
 
     PIDController pid_controller(kp, ki, kd);
 

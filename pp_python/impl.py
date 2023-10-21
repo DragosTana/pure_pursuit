@@ -58,6 +58,7 @@ class Robot:
     def __init__(self, pos:Point, look_ahead:float):
         self.pos = pos
         self.look_ahead = look_ahead
+        self.lenght = 1.5 
 
         # per debugging
         # questo codice è di prova quindi la logica di debug per ora la lascio nel flusso
@@ -178,10 +179,9 @@ class Robot:
                 # path[self.last_found_index] comunque sta indietro per invariate
                 # poi boh
                 self.last_found_index = next(self.last_found_index)
-                print(starting_index, " : ",
-                      self.last_found_index, "falling back to corner")
+                print(starting_index, " : ", self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
-
+        
         print(starting_index, " : ", self.last_found_index,
               """
                 : I don't know how, I don't know why,
@@ -190,7 +190,17 @@ class Robot:
                 is just a \"stronzo porcoddi'\"
                 """)
         return self.default_point
-
+    
+    def stearing_angle(self, position:Point, goal:Point, yaw_angle:float = None) -> float:
+        
+        # position nel sistema di riferimento assoluto
+        # goal nel sistema di riferimento assoluto
+        # alpha: angle between the robot heading and the lookahead point
+        
+        alpha = math.atan2(goal.y - position.y, goal.x - position.x) #- yaw_angle
+        stearing_angle = math.atan2(2.0 * self.lenght * math.sin(alpha), self.look_ahead)
+        return stearing_angle
+        
     def next_in_segment(self, seg:Segment)->Point:
         intersects = self.line_intersects(seg)
         if len(intersects) == 2:
@@ -211,10 +221,17 @@ if __name__ == "__main__":
     #set start position randomly near the first point
     start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
     car = Robot(pos=start_pos, look_ahead = 6)
-    
+    stearing_angle = []
     old_pos = start_pos
-    while True:
+    for i in range(70):
         goal = car.next_point_in(traj)
+        stearing_angle.append(car.stearing_angle(car.pos, goal))
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
         l = np.random.uniform(0.4, 0.6)
         car.set_position(car.pos + (goal - car.pos) * l)
+    
+    fig, ax = plt.subplots()
+    ax.plot(stearing_angle)
+    plt.show()
+        
+    
