@@ -79,8 +79,7 @@ private:
             std::cerr<< "==== BEGIN SOLUTIONS ===="<<std::endl;
             if(solutions.size()) {
                 for (int i = 0; i < solutions.size(); ++i) {
-                    printerr_point("solutions[" + std::to_string(i) + "]",
-                                   solutions[i]);
+                    printerr_point("solutions[" + std::to_string(i) + "]", solutions[i]);
                 }
             } else {
                 std::cerr << "{no solutions}" << std::endl;
@@ -152,8 +151,8 @@ public:
 
     void print_status(Point goal) {
         std::cout<<position.x<<':'<<position.y
-                 <<':'<<goal.x<<':'<<goal.y
-                 <<':'<<radius<<std::endl;
+                <<':'<<goal.x<<':'<<goal.y
+                <<':'<<radius<<std::endl;
 
 #ifdef DEBUGGING
         printerr_point("position : ", position);
@@ -182,8 +181,7 @@ double random_offset(double max) {
 
 int main(int argc, char** argv) {
     if (argc < 4) {
-        std::cerr << "per chiamare fai ./pp <file> <look ahead> <wheel base>"
-                  << std::endl;
+        std::cerr << "per chiamare fai ./pp <file> <look ahead> <wheel base>"<< std::endl;
         return 1;
     }
     std::string waypoints_filename = argv[1];

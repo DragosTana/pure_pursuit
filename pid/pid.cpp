@@ -1,6 +1,5 @@
 #include <iostream>
 
-
 /*
     PID Controller
     
@@ -39,11 +38,18 @@ int main() {
 
     PIDController pid_controller(kp, ki, kd);
 
-    double setpoint = 100.0;
-    double current_value = 50.0;
+    double current_value = 50.0;    
+    double setpoint[100];
+    size_t count = 100;
+
+    for (size_t i = 0; i < count; i++) {   
+        if (i < 25) {setpoint[i] = 50.0;}
+        else if (i < 75) {setpoint[i] = 100.0;}
+        else {setpoint[i] = 50.0;}
+    }
     
-    for (int i = 0; i < 100; ++i) {
-        double output = pid_controller.Calculate(setpoint, current_value);
+    for (size_t i = 0; i < count; ++i) {
+        double output = pid_controller.Calculate(setpoint[i], current_value);
         current_value += output;
         std::cout << i << ":" << current_value << std::endl;
     }
