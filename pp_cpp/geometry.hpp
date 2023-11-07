@@ -53,10 +53,17 @@ public:
     Segment(const Point& start, const Point& end)
         : start(start.x, start.y), end(end.x, end.y) {}
 
+    /*
+    * Returns true if the point is valid, false otherwise.
+    * Valid means that the point is inside the rectangle defined by the segment.
+    * @param[in] p the point to check
+    */
     const bool point_in_rect(const Point& p) const {
         return
-            (start.x <= p.x) && (p.x <= end.x) &&
-            (start.y <= p.y) && (p.y <= end.y);
+            (p.x >= std::min(start.x, end.x)) &&
+            (p.x <= std::max(start.x, end.x)) &&
+            (p.y >= std::min(start.y, end.y)) &&
+            (p.y <= std::max(start.y, end.y));
     }
 };
 
