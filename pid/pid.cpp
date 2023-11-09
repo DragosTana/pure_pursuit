@@ -10,6 +10,8 @@
         3. Implemete low pass filter on derivative term  --> IL TAU sarà due volte la frequenza di campionamento
 */
 
+#define DEBUG 1
+
 class PIDController {
 public:
     PIDController(double kp, double ki, double kd) : kp_(kp), ki_(ki), kd_(kd), integral_(0), previous_error_(0), antiwindup_(false) {}
@@ -21,13 +23,12 @@ public:
         // derivative = lastDerivative + (timeDelta / (timeDelta + RC)) * (derivative - lastDerivative);
 
         if (antiwindup_ == false) {
-            std::cerr <<"antiwindup false"<<std::endl;
             integral_ += error;
-            double output = kp_*error + ki_ * integral_ + kd_ * derivative;
+            output = kp_*error + ki_ * integral_ + kd_ * derivative;
         } 
         else {
-            std::cerr <<"antiwindup true"<<std::endl;
-            double output = kp_ * error + kd_ * derivative;
+            
+            output = kp_ * error + kd_ * derivative;
             antiwindup_ = false;
         }
         
@@ -35,6 +36,14 @@ public:
         bool antiwindup_ = antiwindup(output, clamped_output, error);
         previous_error_ = error;
 
+#if DEBUG
+        std::cerr << "error: " << error << std::endl;
+        std::cerr << "output: " << output << std::endl;
+
+        std::cerr << "Antiwindup: " << antiwindup_ << std::endl;        
+
+        
+#endif
         return clamped_output;
     }
 
@@ -69,8 +78,8 @@ private:
 int main() {
     // TO BE TUNED
     double kp = 0.5;
-    double ki = 0;
-    double kd = 0;
+    double ki = 0.1;
+    double kd = 0.1;
 
     PIDController pid_controller(kp, ki, kd);
 
