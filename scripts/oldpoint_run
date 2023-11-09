@@ -1,0 +1,6 @@
+#!/usr/bin/bash
+
+look_ahead="6"
+if [[ "$1" != "" ]]; then look_ahead="$1"; fi
+
+./pp_cpp/pp pp_python/waypoints.csv "$look_ahead" 1 | python pp_python/cpp_visualization.py
