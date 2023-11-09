@@ -4,10 +4,23 @@
 #include<vector>
 #include<cmath>
 #include<iostream>
+#include<limits>
 
 bool in_range(double a, double ex1, double ex2) {
     // memento, (a <= b <= c) NON funziona in c++
     return ((ex1 <= a) && (a <= ex2)) || ((ex2 <= a) && (a <= ex1));
+}
+
+std::vector<double>quadratic_solutions(double a, double b, double c) {
+    double delta = b*b - 4*a*c;
+    std::vector<double> res = std::vector<double>();
+    if(delta >= 0) {
+        res.reserve(2);
+        double delta_root = sqrt(delta);
+        res.push_back((-b + delta_root) / (2*a));
+        res.push_back((-b - delta_root) / (2*a));
+    }
+    return res;
 }
 
 class Point {
@@ -50,6 +63,43 @@ public:
     }
 };
 
+#define VERY_SMALL (0.0000000001)
+#define VERY_BIG   (10000000000)
+class Line {
+public:
+    double m;
+    double q;
+
+    Line(double m, double q):m(m),q(q){}
+
+    static Line from_points(const Point& a, const Point& b) {
+        double dx = a.x - b.x;
+        double dy = a.y - b.y;
+
+        double m = (fabs(dx) >= VERY_SMALL) ? dy / dx : VERY_BIG;
+        double q = a.y - m*a.x;
+        return Line(m,q);
+    }
+
+    std::vector<Point> circle_intersections(Point& c, double r) const {
+        // https://math.stackexchange.com/questions/228841
+        // how do i calculate the intersections of a straight line and a circle?
+        double x0 = c.x;
+        double y0 = c.y;
+        std::vector<double> xs = quadratic_solutions
+            ((m + 1),
+             (2*(m*q - x0 - m*y0)),
+             (x0*x0 + q*q - 2*q*y0 + y0*y0 - r*r));
+        std::vector<Point> res = std::vector<Point>();
+        res.reserve(xs.size());
+        for(double x:xs) {
+            res.push_back(Point(x, m*x + q)); 
+        }
+        return res;
+    }
+};
+
+
 class Segment {
 public:
     Point start;
@@ -70,9 +120,16 @@ public:
             (p.y >= std::min(start.y, end.y)) &&
             (p.y <= std::max(start.y, end.y));
     }
+
+    std::vector<Point> circle_intersections(Point& c, double r) const {
+        Line l = Line::from_points(start, end);
+        std::vector<Point> res = l.circle_intersections(c,r);
+        for(int i = 0; i<res.size(); ++i) {
+            if(!point_in_rect(res[i]))
+                res.erase(res.begin() + i);
+        }
+        return res;
+    }
 };
-
-
-
 
 #endif

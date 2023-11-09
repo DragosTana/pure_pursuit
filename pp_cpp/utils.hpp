@@ -1,19 +1,6 @@
 #ifndef PP_CPP_UTILS_H
 #define PP_CPP_UTILS_H
 
-/**
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * FANCULO PRAGMA ONCE
- * @param fanculo
- * @return pragma once 
- */
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

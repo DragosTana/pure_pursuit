@@ -1,4 +1,4 @@
-#include <chrono>
+#include <iostream>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -9,17 +9,13 @@
 #include "utils.hpp"
 #include "geometry.hpp"
 
-#define DEBUGGING 1
+#define DEBUGGING
 /*
-    ./pp_cpp/pp waypoints.csv 4 2 | python3 pp_python/cpp_visualization.py
-    NOTE:
-    passare a float invece di double?
-*/
+ * PurePursuit class
+ * This class implements the pure pursuit algorithm for path following
+ */
+enum intersect_status {INSIDE, OUTSIDE, CUTTING};
 
-/*
-* PurePursuit class
-* This class implements the pure pursuit algorithm for path following
-*/
 class PurePursuit {
 private:
     int last_visited = 0; // suona decisamente meglio di last_found_index
@@ -27,6 +23,20 @@ private:
     double wheel_base;
     Point position;
     const std::vector<Point>& path;
+
+    intersect_status segment_intersect_status(Segment seg) const {
+        double hh = horizon*horizon;
+        if(position.distance_square(seg.start) > hh) {
+            if(position.distance_square(seg.end) > hh) {
+                return OUTSIDE;
+            }
+        }
+
+        else if (position.distance_square(seg.end) <= hh) {
+                return INSIDE;
+        }
+        return CUTTING;
+    }
 
     // TODO questa cosa fa cagare, ma non so come altro segnalare "non ho trovato"
     const Point error_point = Point(MAXFLOAT, MAXFLOAT);
@@ -87,28 +97,28 @@ private:
             }
 
 #ifdef DEBUGGING
-            printerr_point("segment start", seg.start);
-            printerr_point("segment end", seg.end);
+            printerr_segment("segment to intersect - ", seg);
             printerr_point("solution 1", sol1);
             printerr_point("solution 2", sol2);
             std::cerr<<"last visited : "<<last_visited<<std::endl;
 
-            std::cerr<<"intersects {"<<std::endl;
+            std::cerr<<"intersects {";
             if(solutions.size()) {
                 for (int i = 0; i < solutions.size(); ++i) {
-                    printerr_point("solutions[" + std::to_string(i) + "]", solutions[i]);
+                    printerr_point(" solutions[" + std::to_string(i) + "]=", solutions[i], "", false);
                 }
             } else {
-                std::cerr << "none" << std::endl;
+                std::cerr << " none";
             }
-            std::cerr<<"}"<<std::endl;
+            std::cerr<<" }"<<std::endl;
 #endif
         }
         return solutions;
     }
 
     Point next_in_segment(const Segment& seg) {
-        std::vector<Point> intersects = segment_intersections(seg);
+        // std::vector<Point> intersects = segment_intersections(seg);
+        std::vector<Point> intersects = seg.circle_intersections(position, horizon);
         switch(intersects.size()) {
         case 1:
             return intersects[0];
@@ -128,72 +138,37 @@ private:
               && position.distance(s.end) >= horizon;
         };
 
-        for(int i = this->last_visited, n_visited = 0;
-            n_visited != path.size();
-            i = next_ind(i), ++n_visited)
+        for(int i = this->last_visited, n_visited = 0; n_visited != path.size(); i = next_ind(i), ++n_visited)
             {   
-                
                 Segment segment = Segment(path[i], path[next_ind(i)]);
-                // boh, speriamo che funzioni
-                if (!does_segment_cut(segment)) {
-                    printerr_point("with segment start ", segment.start);
-                    std::cerr << "distance : "
-                              << position.distance(segment.start)
-                              <<std::endl;
-                    printerr_point("and end", segment.end);
-                    std::cerr << "distance : "
-                              <<position.distance(segment.end)
-                              <<std::endl;
-                    printerr_point("and position", position);
-                    std::cerr<<"segment does not cut"<<std::endl;
+                switch (segment_intersect_status(segment)) {
+                case INSIDE:
+                    // vai avanti e cerca qualcosa che intersechi
+                    printerr_segment("segment ", segment, " inside the circle");
                     continue;
-                } else {
-                    printerr_point("with segment start ", segment.start);
-                    std::cerr << "distance : "
-                              << position.distance(segment.start)
-                              <<std::endl;
-                    printerr_point("and end", segment.end);
-                    std::cerr << "distance : "
-                              <<position.distance(segment.end)
-                              <<std::endl;
-                    printerr_point("and position", position);
-                    std::cerr<<"SEGMENT DOES INDEED CUT"<<std::endl;
-                }
-                Point segment_goal = next_in_segment(segment);
-#ifdef DEBUGGING
-                printerr_point("segment goal", segment_goal);
-#endif
-                if(is_valid_point(segment_goal)) {
-                    // intersection found with segment
-                    if(segment.end.is_closer(position, segment_goal)) {
-                        this->last_visited = next_ind(i);
-                        std::cerr<<"fucked the distance, falling back to next boi"
-                                 <<std::endl;
+
+                case OUTSIDE:
+                    // la ricerca non può fare troppa roba in questo caso, prendi il primo vertice 
+                    printerr_segment("segment ", segment, " outside the circle");
+                    return path[last_visited];
+
+                case CUTTING:
+                    printerr_segment("segment ", segment, " cuts the circle");
+                    Point goal = next_in_segment(segment);
+                    printerr_point("instersection is ", goal);
+                    if (is_valid_point(goal) && ! (segment.end.is_closer(position, goal))) {
+                        last_visited = i;
+                        return goal;
+                    }
+                    else
                         continue;
-                    }
-                    else {
-                        std::cerr<<"distance is not fucked, "
-                                 <<"so we're returning the segment intersect"
-                                 <<std::endl;
-                        this->last_visited = i;
-                        return segment_goal;
-                    }
-                }
-                else {
-                    std::cerr<<"no segment intersect found, returning next vertex"
-                             <<std::endl;
-                    // no intersection found with segment
-                    this->last_visited = next_ind(this->last_visited);
-                    // this->last_visited = next_ind(i);
-                    return path[this->last_visited];
                 }
             }
-        std::cerr<<"in the end : last found " << last_visited << std::endl;
         return error_point;
     }
 
-    Point goal_point(){
-
+    /*
+    Point goal_point() {
         auto next_ind = [this](const int i) {return (i+1)%path.size();};
 
         for (int i = this->last_visited, n_visited = 0; n_visited != path.size(); i = next_ind(i), ++n_visited) {
@@ -221,6 +196,7 @@ private:
         std::cerr<<"in the end : last found " << last_visited << std::endl;
         return error_point;
     }
+    */
 
     void wee_wee_move(const Point& goal) {
         position.x = (position.x + goal.x)/2;
@@ -236,11 +212,28 @@ private:
         printerr_point("position : ", position);
         printerr_point("goal", goal);
         std::cerr<< "horizon : " << horizon << std::endl;
+        std::cerr<< "distance from goal : " << position.distance(goal) << std::endl;
 #endif
     }
 
-    void printerr_point(const std::string name, const Point &p) const {
-        std::cerr<<name<< " - coorrds : "<<p.x<<':'<<p.y<<std::endl;
+    void printerr_point(std::string preamble, const Point &p,
+                        std::string postamble="", bool endline=true) const {
+        std::cerr << preamble
+                  << p.x << "," << p.y
+                  << postamble;
+        if(endline)
+            std::cerr<<std::endl;
+    }
+
+    void printerr_segment(std::string preamble, const Segment &s,
+                          std::string postamble="", bool endline=true) const {
+        std::cerr << preamble
+                  << s.start.x << "," << s.start.y
+                  << " - "
+                  << s.end.x<<","<<s.end.y
+                  << postamble;
+        if(endline)
+            std::cerr<<std::endl;
     }
 
     bool is_inside_radius(const Point& p) {
@@ -249,27 +242,32 @@ private:
     }
 
 public:
+#ifdef DEBUGGING
     int frame_id = 0;
+#endif
+
     PurePursuit(float radius, float wheel_base, const Point &position, const std::vector<Point> &path)
         : horizon(radius), wheel_base(wheel_base),
         position(position.x, position.y),
         path(path)
     {}
+
     void wee_wee_path() {
         while(true) {
             Point goal = next_in_path();
             
+#ifdef DEBUGGING
             int loop_id = 0;
+#endif
             do {
-                std::cerr<<"{{{ STATUS "<< loop_id++ << "  }}}"<<std::endl;
+#ifdef DEBUGGING
+                std::cerr<<"{{{ LOOP STATUS "<< loop_id++ << "  }}}"<<std::endl;
+#endif
                 print_status(goal);
-                std::cerr<<"{{{ AFTER MOVING }}}"<<std::endl;
                 wee_wee_move(goal);
-                print_status(goal);
             } while (!is_inside_radius(goal));
             std::cerr<<"{{{ FINE FRAME "<< frame_id++ << " }}}"<<std::endl;
             std::cin.ignore(1);
-            // std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
     }
 };
