@@ -1,20 +1,29 @@
 #include <iostream>
-
+#include <jsoncpp/json/value.h>
+#include <fstream>
+#include <string>
 /*
     PID Controller
     
     TODO: 
 
-        1. Implement anti-windup on integral term -- FATTOOO piu o meno
+        1. Implement anti-windup on integral term -- FATTOOO 
         2. Implement derivative on measurement
         3. Implemete low pass filter on derivative term  --> IL TAU sarà due volte la frequenza di campionamento
 */
-
-#define DEBUG 1
+#define DEBUG
 
 class PIDController {
 public:
-    PIDController(double kp, double ki, double kd) : kp_(kp), ki_(ki), kd_(kd), integral_(0), previous_error_(0), antiwindup_(false) {}
+    PIDController(double kp, double ki, double kd, double min_output , double max_output) : 
+        kp_(kp), 
+        ki_(ki), 
+        kd_(kd), 
+        min_output_(min_output),
+        max_output_(max_output),
+        integral_(0), 
+        previous_error_(0), 
+        antiwindup_(false) {}
 
     double Calculate(double setpoint, double current_value) {
         double error = setpoint - current_value; // vel desiderata - vel attuale
@@ -27,7 +36,6 @@ public:
             output = kp_*error + ki_ * integral_ + kd_ * derivative;
         } 
         else {
-            
             output = kp_ * error + kd_ * derivative;
             antiwindup_ = false;
         }
@@ -36,23 +44,23 @@ public:
         bool antiwindup_ = antiwindup(output, clamped_output, error);
         previous_error_ = error;
 
-#if DEBUG
+#ifdef DEBUG
+        std::cerr << "======================================" << std::endl;
         std::cerr << "error: " << error << std::endl;
+        std::cerr << "antiwindup: " << antiwindup_ << std::endl;
         std::cerr << "output: " << output << std::endl;
+        std::cerr << "clamped_output: " << clamped_output << std::endl;
+#endif        
 
-        std::cerr << "Antiwindup: " << antiwindup_ << std::endl;        
-
-        
-#endif
         return clamped_output;
     }
 
     double clamping(double output) {
-        if (output > 100) {
-            output = 100;
+        if (output > max_output_) {
+            output = max_output_;
         }
-        else if (output < -100) {
-            output = -100;
+        else if (output < min_output_) {
+            output = min_output_;
         }
         return output;
     }
@@ -69,6 +77,8 @@ private:
     double kp_;
     double ki_;
     double kd_;
+    double min_output_;
+    double max_output_;
     double integral_;
     double previous_error_;
     // double lastDerivative_;
@@ -76,12 +86,22 @@ private:
 };
 
 int main() {
-    // TO BE TUNED
-    double kp = 0.5;
+    // std::ifstream parameters("parameters.json", std::ifstream::binary);
+    // Json::Value param;
+    // parameters >> param;
+    // double kp = std::stod(param["kp"]);
+    // double ki = std::stod(param["ki"]);
+    // double kd = std::stod(param["kd"]);
+    // double min_output = std::stod(param["min_output"]);
+    // double max_output = std::stod(param["max_output"]);
+
+    double kp = 1;
     double ki = 0.1;
     double kd = 0.1;
+    double min_output = -10.0;
+    double max_output = 10.0;
 
-    PIDController pid_controller(kp, ki, kd);
+    PIDController pid_controller(kp, ki, kd, min_output, max_output);
 
     double current_value = 50.0;    
     double setpoint[100];
