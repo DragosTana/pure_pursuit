@@ -210,7 +210,7 @@ if __name__ == "__main__":
     plot = view.ControlView(traj[0], path_arr, show_old_pos=True)
     #set start position randomly near the first point
     start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
-    car = Robot(pos=start_pos, look_ahead = 6)
+    car = Robot(pos=start_pos, look_ahead = 1)
     
     old_pos = start_pos
     while True:

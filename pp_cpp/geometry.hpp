@@ -5,6 +5,11 @@
 #include<cmath>
 #include<iostream>
 
+bool in_range(double a, double ex1, double ex2) {
+    // memento, (a <= b <= c) NON funziona in c++
+    return ((ex1 <= a) && (a <= ex2)) || ((ex2 <= a) && (a <= ex1));
+}
+
 class Point {
 public:
     double x;
@@ -54,10 +59,12 @@ public:
         : start(start.x, start.y), end(end.x, end.y) {}
 
     const bool point_in_rect(const Point& p) const {
-        return
-            (start.x <= p.x) && (p.x <= end.x) &&
-            (start.y <= p.y) && (p.y <= end.y);
+        return in_range(p.x, start.x, end.x)
+            && in_range(p.y, start.y, end.y);
     }
 };
+
+
+
 
 #endif

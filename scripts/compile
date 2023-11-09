@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+cd pp_cpp
+g++ -Wall -pedantic -g3 -o pp pure_pursuit.cpp
