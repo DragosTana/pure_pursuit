@@ -10,7 +10,16 @@
 #include "geometry.hpp"
 
 #define DEBUGGING 1
+/*
+    ./pp_cpp/pp waypoints.csv 4 2 | python3 pp_python/cpp_visualization.py
+    NOTE:
+    passare a float invece di double?
+*/
 
+/*
+* PurePursuit class
+* This class implements the pure pursuit algorithm for path following
+*/
 class PurePursuit {
 private:
     int last_visited = 0; // suona decisamente meglio di last_found_index
@@ -22,6 +31,11 @@ private:
     // TODO questa cosa fa cagare, ma non so come altro segnalare "non ho trovato"
     const Point error_point = Point(MAXFLOAT, MAXFLOAT);
     const double some_threshold = 10000.0;
+
+    /*
+    * Returns true if the point is valid, false otherwise
+    * @param[in] p the point to check
+    */
     bool is_valid_point(const Point& p) const {
         return
             (fabs(p.x) <= some_threshold) &&
@@ -64,23 +78,25 @@ private:
 
             // potrebbe non essere il non plus ultra dell'efficienza
             // possibili altri metodi?
-            if (seg.point_in_rect(sol1))
-                solutions.push_back(sol1);
 
-            if (seg.point_in_rect(sol2))
-                solutions.push_back(sol2);
+            if (seg.point_in_rect(sol1)) {
+                solutions.push_back(sol1);
+            }
+            if (seg.point_in_rect(sol2)) {
+                solutions.push_back(sol2);      
+            }
 
 #ifdef DEBUGGING
             printerr_point("segment start", seg.start);
             printerr_point("segment end", seg.end);
             printerr_point("solution 1", sol1);
             printerr_point("solution 2", sol2);
+            std::cerr<<"last visited : "<<last_visited<<std::endl;
 
             std::cerr<<"intersects {"<<std::endl;
             if(solutions.size()) {
                 for (int i = 0; i < solutions.size(); ++i) {
-                    printerr_point("solutions[" + std::to_string(i) + "]",
-                                   solutions[i]);
+                    printerr_point("solutions[" + std::to_string(i) + "]", solutions[i]);
                 }
             } else {
                 std::cerr << "none" << std::endl;
@@ -90,7 +106,8 @@ private:
         }
         return solutions;
     }
-    Point next_in_segment(const Segment& seg) const {
+
+    Point next_in_segment(const Segment& seg) {
         std::vector<Point> intersects = segment_intersections(seg);
         switch(intersects.size()) {
         case 1:
@@ -114,7 +131,8 @@ private:
         for(int i = this->last_visited, n_visited = 0;
             n_visited != path.size();
             i = next_ind(i), ++n_visited)
-            {
+            {   
+                
                 Segment segment = Segment(path[i], path[next_ind(i)]);
                 // boh, speriamo che funzioni
                 if (!does_segment_cut(segment)) {
@@ -166,9 +184,40 @@ private:
                              <<std::endl;
                     // no intersection found with segment
                     this->last_visited = next_ind(this->last_visited);
+                    // this->last_visited = next_ind(i);
                     return path[this->last_visited];
                 }
             }
+        std::cerr<<"in the end : last found " << last_visited << std::endl;
+        return error_point;
+    }
+
+    Point goal_point(){
+
+        auto next_ind = [this](const int i) {return (i+1)%path.size();};
+
+        for (int i = this->last_visited, n_visited = 0; n_visited != path.size(); i = next_ind(i), ++n_visited) {
+            std::cerr<<"i : "<<i<<std::endl;
+            Segment segment = Segment(path[i], path[next_ind(i)]);
+            Point segment_goal = next_in_segment(segment);
+            if (is_valid_point(segment_goal)) {
+                // intersection found with segment
+                if (segment.end.is_closer(position, segment_goal)) {
+                    //this->last_visited = next_ind(i);
+                    std::cerr<<"case in which goal is behind the position"<<std::endl;
+                    continue;
+                } else {
+                    std::cerr<<"trovato goal"<<std::endl;
+                    this->last_visited = i;
+                    return segment_goal;
+                }
+            } else {
+                // no intersection found with segment
+                this->last_visited = next_ind(this->last_visited);
+                return path[this->last_visited];
+            }
+        }
+
         std::cerr<<"in the end : last found " << last_visited << std::endl;
         return error_point;
     }
@@ -209,7 +258,6 @@ public:
     void wee_wee_path() {
         while(true) {
             Point goal = next_in_path();
-
             
             int loop_id = 0;
             do {
@@ -232,8 +280,7 @@ double random_offset(double max) {
 
 int main(int argc, char** argv) {
     if (argc < 4) {
-        std::cerr << "per chiamare fai ./pp <file> <look ahead> <wheel base>"
-                  << std::endl;
+        std::cerr << "per chiamare fai ./pp <file> <look ahead> <wheel base>"<< std::endl;
         return 1;
     }
     std::string waypoints_filename = argv[1];
@@ -248,3 +295,4 @@ int main(int argc, char** argv) {
     pp.wee_wee_path();
     return 0;
 }
+

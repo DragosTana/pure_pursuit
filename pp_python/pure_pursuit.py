@@ -6,58 +6,13 @@ import matplotlib.animation as animation
 from IPython import display
 import view
 
-class Point:
-    def __init__(self, x, y):
-        self.x:float = x
-        self.y:float = y
-
-    def is_closer(self, closer, farther) -> bool:
-        return dist_squared(self, farther) > dist_squared(self, closer)
-
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
-    
-    def __sub__(self, other):
-        return Point(self.x - other.x, self.y - other.y)
-    
-    def __mul__(self, other):
-        return Point(self.x * other, self.y * other)
-    
-    def __call__(self):
-        return [self.x, self.y]
-
-# non posso mettere type hint a point dentro la classe point
-# quindi, ahime', eccoce, fa un po' schifo
-# ma tanto ste sono usate solo per is_closer()
-
-def dist_squared(p1:Point, p2:Point) -> float:
-    dx, dy = (p1.x - p2.x), (p1.y - p2.y)
-    return np.linalg.norm([dx, dy])
-
-def dist(p1:Point, p2:Point) -> float:
-    return math.sqrt(dist_squared(p1, p2))
-
-class Segment:
-    def __init__(self, start:Point, end:Point):
-        self.start = start
-        self.end = end
-
-        self.max_x = max(start.x, end.x)
-        self.max_y = max(start.y, end.y)
-        self.min_x = min(start.x, end.x)
-        self.min_y = min(start.y, end.y)
-
-    def point_in_rect(self, p:Point) -> bool:
-        """
-        returns whether the point p is in the bounding box of the segment
-        """
-        return (self.min_x <= p.x <= self.max_x and
-                self.min_y <= p.y <= self.max_y)
+from geometry import Point, Segment
 
 class Robot:
     def __init__(self, pos:Point, look_ahead:float):
         self.pos = pos
         self.look_ahead = look_ahead
+        self.lenght = 1.5 
 
         # per debugging
         # questo codice è di prova quindi la logica di debug per ora la lascio nel flusso
@@ -68,8 +23,6 @@ class Robot:
         self.default_point = Point(-10000,-10000)
         self.last_found_index = 0
 
-    #! NOTE: why do we need a setter for pos?
-    # ho fatto troppo java in vita mia, e ha avuto delle conseguenze
     def set_position(self, pos:Point):
         self.pos = pos
 
@@ -78,6 +31,9 @@ class Robot:
         self.segment_intersects = []
 
     def line_intersects(self, s:Segment) -> list[Point]:
+        """
+        Function that returns the intersection between the segment and the circle.
+        """
         x1_off = s.start.x - self.pos.x
         y1_off = s.start.y - self.pos.y
         x2_off = s.end.x - self.pos.x
@@ -133,7 +89,7 @@ class Robot:
             print("last found : ", self.last_found_index)
             self.reset_debugging_info()
             
-    def next_point_in(self, path)->Point:
+    def next_point_in(self, path:list[Point]) -> Point:
         starting_index = self.last_found_index
         # starting_index viene utilizzato solo per definire il range, così possiamo 
         # modificare last_found_index nel loop senza problemi
@@ -178,10 +134,9 @@ class Robot:
                 # path[self.last_found_index] comunque sta indietro per invariate
                 # poi boh
                 self.last_found_index = next(self.last_found_index)
-                print(starting_index, " : ",
-                      self.last_found_index, "falling back to corner")
+                print(starting_index, " : ", self.last_found_index, "falling back to corner")
                 return path[self.last_found_index]
-
+        
         print(starting_index, " : ", self.last_found_index,
               """
                 : I don't know how, I don't know why,
@@ -190,7 +145,13 @@ class Robot:
                 is just a \"stronzo porcoddi'\"
                 """)
         return self.default_point
-
+    
+    def stearing_angle(self, position:Point, goal:Point, yaw_angle:float = None) -> float:
+        #! NOTE: this doesn't make any fucking sense. we need real yaw angle
+        alpha = math.atan2(goal.y - position.y, goal.x - position.x) #- yaw_angle
+        stearing_angle = math.atan2(2.0 * self.lenght * math.sin(alpha), self.look_ahead)
+        return stearing_angle
+        
     def next_in_segment(self, seg:Segment)->Point:
         intersects = self.line_intersects(seg)
         if len(intersects) == 2:
@@ -210,11 +171,14 @@ if __name__ == "__main__":
     plot = view.ControlView(traj[0], path_arr, show_old_pos=True)
     #set start position randomly near the first point
     start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
-    car = Robot(pos=start_pos, look_ahead = 1)
-    
+    car = Robot(pos = start_pos, look_ahead = 6)
+    stearing_angle = []
     old_pos = start_pos
-    while True:
+    for i in range(70):
         goal = car.next_point_in(traj)
+        stearing_angle.append(car.stearing_angle(car.pos, goal))
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
         l = np.random.uniform(0.4, 0.6)
         car.set_position(car.pos + (goal - car.pos) * l)
+        
+    

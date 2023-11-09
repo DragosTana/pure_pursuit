@@ -8,7 +8,16 @@ output, _ = process.communicate()
 # Initialize lists to store data
 i_values = []
 current_values = []
+reference = []
 
+for i in range(100):
+    if i < 25:
+        reference.append(50)
+    elif i < 75:
+        reference.append(100)
+    else:
+        reference.append(50)
+        
 # Parse the output and store the data
 for line in output.splitlines():
     parts = line.split(":")
@@ -17,7 +26,8 @@ for line in output.splitlines():
 
 # Plot the data
 plt.plot(i_values, current_values, label='Current Value')
-plt.axhline(y=100, color='r', linestyle='-', label='Setpoint')
+plt.plot(i_values, reference, label='Reference')
+#plt.axhline(y=100, color='r', linestyle='-', label='Setpoint')
 plt.xlabel('i')
 plt.ylabel('Current Value')
 plt.legend()
