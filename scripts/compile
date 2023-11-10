@@ -1,4 +1,11 @@
 #!/usr/bin/bash
 
 cd pp_cpp
-g++ -Wall -pedantic -g3 -o pp pure_pursuit.cpp
+if [[ "$1" == "release" ]]; then
+    echo "compiling for relase" &&
+    g++ -Wall -pedantic -O2 -o bin/pp pure_pursuit.cpp;
+else
+    echo "compiling for debug" &&
+    g++ -Wall -pedantic -g3 -o bin/pp pure_pursuit.cpp;
+fi
+

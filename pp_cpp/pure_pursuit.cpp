@@ -155,13 +155,19 @@ private:
                 case CUTTING:
                     printerr_segment("segment ", segment, " cuts the circle");
                     Point goal = next_in_segment(segment);
-                    printerr_point("instersection is ", goal);
-                    if (is_valid_point(goal) && ! (segment.end.is_closer(position, goal))) {
+                    printerr_point("instersection is : ", goal);
+                    if (is_valid_point(goal)
+                        && segment.end.is_closer(goal, position)) {
+                        std::cerr<<"point is not fucked"<<std::endl;
                         last_visited = i;
                         return goal;
                     }
-                    else
+                    else {
+                        std::cerr<<"point is indeed fucked"<<std::endl;
+                        // prevent going backwards
+                        last_visited = i+1;
                         continue;
+                    }
                 }
             }
         return error_point;
@@ -210,7 +216,7 @@ private:
 
 #ifdef DEBUGGING
         printerr_point("position : ", position);
-        printerr_point("goal", goal);
+        printerr_point("goal : ", goal);
         std::cerr<< "horizon : " << horizon << std::endl;
         std::cerr<< "distance from goal : " << position.distance(goal) << std::endl;
 #endif
