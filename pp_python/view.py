@@ -31,7 +31,7 @@ class ControlView():
         
         # plot the coordinate of each waypoint
         for i, wp in enumerate(way_points):
-            plt.text(wp[0] + 0.5, wp[1] + 0.5, str(i), fontsize=12)
+            plt.text(wp[0] + 0.5, wp[1] + 0.5, '({}, {})'.format(trucate_float(wp[0], 1), trucate_float(wp[1], 1)), fontsize=7)
         
         axButton = plt.axes([0.85, 0.8, 0.05, 0.05])
         self.button = Button(axButton, label= "Start") 
@@ -82,6 +82,13 @@ class ControlView():
         plot_circ.remove()
 
 plt.show()
+
+def trucate_float(f, n):
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])
 
 def get_waypoints():
     way_points = pd.read_csv('waypoints.csv')
