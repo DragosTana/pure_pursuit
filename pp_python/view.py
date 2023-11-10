@@ -28,6 +28,11 @@ class ControlView():
         self.ax.set_aspect('equal', adjustable='box')
         plt.plot([p[0] for p in way_points], [p[1] for p in way_points], '.', color = "red")
         plt.plot([p[0] for p in way_points], [p[1] for p in way_points],'--', color = "grey")
+        
+        # plot the coordinate of each waypoint
+        for i, wp in enumerate(way_points):
+            plt.text(wp[0] + 0.5, wp[1] + 0.5, str(i), fontsize=12)
+        
         axButton = plt.axes([0.85, 0.8, 0.05, 0.05])
         self.button = Button(axButton, label= "Start") 
         axSlider = plt.axes([0.85, 0.7, 0.1, 0.01])
