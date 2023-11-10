@@ -89,12 +89,11 @@ void test_line_intersects() {
         test_case(asse x no intersect) {
             Line l = Line(0, 0);
             std::vector<Point> pv;
-            Point p=Point(0,0);
-            pv = l.circle_intersections(p=Point(10, 10), 1.0);
+            pv = l.circle_intersections(Point(10, 10), 1.0);
             ass_eq(pv.size(), 0);
-            pv = l.circle_intersections(p=Point(5, 5), 1.0);
+            pv = l.circle_intersections(Point(5, 5), 1.0);
             ass_eq(pv.size(), 0);
-            pv = l.circle_intersections(p=Point(-5, -2), 1.0);
+            pv = l.circle_intersections(Point(-5, -2), 1.0);
             ass_eq(pv.size(), 0);
         }end_case;
 
@@ -118,8 +117,7 @@ void test_line_intersects() {
         test_case(asse x normale 1) {
             Line l = Line(0, 0);
             std::vector<Point> pv;
-            Point p=Point(0,0);
-            pv = l.circle_intersections(p=Point(3,4), 5.0);
+            pv = l.circle_intersections(Point(3,4), 5.0);
             ass_eq(pv.size(), 2);
             Point a = pv[0];
             Point b = pv[1];
@@ -133,8 +131,7 @@ void test_line_intersects() {
         test_case(asse x normale 2) {
             Line l = Line(0, 0);
             std::vector<Point> pv;
-            Point p=Point(0,0);
-            pv = l.circle_intersections(p=Point(4,3), 5.0);
+            pv = l.circle_intersections(Point(4,3), 5.0);
             ass_eq(pv.size(), 2);
             Point a = pv[0];
             Point b = pv[1];
@@ -148,10 +145,189 @@ void test_line_intersects() {
         test_case(asse y) {
         }end_case;
     }end_suite;
+
+    test_suite(preso da segment circle intersects) {
+        const double root_two = sqrt(2);
+        const double root_two_half = root_two/2;
+        test_case(base interseca due punti) {
+            double r = 1;
+            Point c = Point(0,0);
+            auto l = Line::from_points(Point(-1, -1), Point(1, 1));
+            auto intersects = l.circle_intersections(c, r);
+            ass_eq(intersects.size(), 2);
+            Point a = intersects[0];
+            Point b = intersects[1];
+            if (a.x >= b.x)
+                swap(a,b);
+
+            ass_eq_float(a.x, -root_two_half, EPS);
+            ass_eq_float(a.y, -root_two_half, EPS);
+
+            ass_eq_float(b.x, root_two_half, EPS);
+            ass_eq_float(b.y, root_two_half, EPS);
+
+            ass_eq_float(a.distance(c), r, EPS);
+            ass_eq_float(c.distance(a), r, EPS);
+
+            ass_eq_float(b.distance(c), r, EPS);
+            ass_eq_float(c.distance(b), r, EPS);
+        }end_case;
+
+        test_case(molto verticaloso parte 1) {
+            double r = 2;
+            Point c = Point(0,0);
+            Line l = Line::from_points(Point(0, 0), Point(0.0001, 1000));
+            auto intersects = l.circle_intersections(c, r);
+            ass_eq(intersects.size(),2);
+
+            Point a = intersects[0];
+            Point b = intersects[1];
+            if (a.y >= b.y)
+                swap(a,b);
+
+            exp_eq_float(a.x, 0, 0.00001);
+            exp_eq_float(a.y, -2, 0.00001);
+
+            exp_eq_float(b.x, 0, 0.00001);
+            exp_eq_float(b.y, 2, 0.00001);
+
+            exp_eq_float(a.distance(c), r, EPS);
+            exp_eq_float(c.distance(a), r, EPS);
+
+            exp_eq_float(b.distance(c), r, EPS);
+            exp_eq_float(c.distance(b), r, EPS);
+        }end_case;
+
+        test_case(molto verticaloso parte due) {
+            double r = 1.5;
+            Point c = Point(0,1.5);
+            Line l  = Line::from_points(Point(0, 0), Point(0.0001, 1000));
+            auto intersects = l.circle_intersections(c, r);
+            ass_eq(intersects.size(),2);
+
+            Point a = intersects[0];
+            Point b = intersects[1];
+            if (a.y >= b.y)
+                swap(a,b);
+
+            exp_eq_float(a.x, 0, 0.00001);
+            exp_eq_float(a.y, 0, 0.00001);
+
+            exp_eq_float(b.x, 0, 0.00001);
+            exp_eq_float(b.y, 3, 0.00001);
+
+            exp_eq_float(a.distance(c), r, EPS);
+            exp_eq_float(c.distance(a), r, EPS);
+
+            exp_eq_float(b.distance(c), r, EPS);
+            exp_eq_float(c.distance(b), r, EPS);
+        }end_case;
+    }end_suite;
 }
 
 void test_segment_intersects() {
-    return;
+    test_suite(segment circle intersects) {
+        const double root_two = sqrt(2);
+        const double root_two_half = root_two/2;
+        test_case(base interseca due punti) {
+            double r = 1;
+            Point c = Point(0,0);
+            auto s = Segment(Point(-1, -1), Point(1, 1));
+            auto intersects = s.circle_intersections(c, r);
+            ass_eq(intersects.size(), 2);
+            Point a = intersects[0];
+            Point b = intersects[1];
+            if (a.x >= b.x)
+                swap(a,b);
+
+            ass_eq_float(a.x, -root_two_half, EPS);
+            ass_eq_float(a.y, -root_two_half, EPS);
+
+            ass_eq_float(b.x, root_two_half, EPS);
+            ass_eq_float(b.y, root_two_half, EPS);
+
+            ass_eq_float(a.distance(c), r, EPS);
+            ass_eq_float(c.distance(a), r, EPS);
+
+            ass_eq_float(b.distance(c), r, EPS);
+            ass_eq_float(c.distance(b), r, EPS);
+        }end_case;
+
+        test_case(base non interseca) {
+            auto s = Segment(Point(2, 2), Point(1, 1));
+            auto intersects = s.circle_intersections(Point(0,0), 1);
+            ass_eq(intersects.size(), 0);
+        }end_case;
+
+        test_case(base interseca un punto) {
+            double r = 2;
+            Point c = Point(0,0);
+            auto s = Segment(Point(2, 2), Point(1, 1));
+            auto intersects = s.circle_intersections(c, r);
+            ass_eq(intersects.size(), 1);
+            ass_eq_float(intersects[0].x, root_two, EPS);
+            ass_eq_float(intersects[0].y, root_two, EPS);
+
+            ass_eq_float(intersects[0].distance(c), r, EPS);
+            ass_eq_float(c.distance(intersects[0]), r, EPS);
+        }end_case;
+
+        test_case(molto verticaloso interseca un punto) {
+            double r = 2;
+            Point c = Point(0,0);
+            auto s = Segment(Point(0, 0), Point(0.0001, 1000));
+            auto intersects = s.circle_intersections(c, r);
+            ass_eq(intersects.size(),1);
+
+            ass_eq_float(intersects[0].x, 0, 0.00001);
+            ass_eq_float(intersects[0].y, 2, 0.00001);
+
+            ass_eq_float(intersects[0].distance(c), r, EPS);
+            ass_eq_float(c.distance(intersects[0]), r, EPS);
+        }end_case;
+
+        test_case(verticaloso interseca due punti) {
+            double r = 1.5;
+            Point c = Point(0,1.5);
+            auto s = Segment(Point(0, 0), Point(0.0001, 1000));
+            auto intersects = s.circle_intersections(c, r);
+            ass_eq(intersects.size(),2);
+
+            Point a = intersects[0];
+            Point b = intersects[1];
+            if (a.y >= b.y)
+                swap(a,b);
+
+            ass_eq_float(a.x, 0, 0.00001);
+            ass_eq_float(a.y, 0, 0.00001);
+
+            ass_eq_float(b.x, 0, 0.00001);
+            ass_eq_float(b.y, 3, 0.00001);
+
+            ass_eq_float(a.distance(c), r, EPS);
+            ass_eq_float(c.distance(a), r, EPS);
+
+            ass_eq_float(b.distance(c), r, EPS);
+            ass_eq_float(c.distance(b), r, EPS);
+
+        }end_case;
+
+        test_case(verticaloso ma non interseca che sta troppo in alto) {
+            ass_t(true);
+        }end_case;
+
+        test_case(verticaloso ma non interseca che sta troppo in basso) {
+            ass_t(true);
+        }end_case;
+
+        test_case(verticaloso ma non interseca che sta troppo a destra) {
+            ass_t(true);
+        }end_case;
+
+        test_case(verticaloso ma non interseca che sta troppo a sinistra) {
+            ass_t(true);
+        }end_case;
+    }end_suite;
 }
 
 int main() {
@@ -160,6 +336,7 @@ int main() {
     test_line();
     test_line_intersects();
     test_segment_intersects();
+    std::cout<<std::endl;
     std::cout<<"se non è esploso niente allora passato tutto"<<std::endl;
     std::cout<<"se è esploso qualcosa credo che tu l'abbia già visto"<<std::endl;
 }

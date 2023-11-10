@@ -1,3 +1,4 @@
+#include <bits/types/error_t.h>
 #include <iostream>
 #include <cmath>
 #include <cstdio>
@@ -23,20 +24,6 @@ private:
     double wheel_base;
     Point position;
     const std::vector<Point>& path;
-
-    intersect_status segment_intersect_status(Segment seg) const {
-        double hh = horizon*horizon;
-        if(position.distance_square(seg.start) > hh) {
-            if(position.distance_square(seg.end) > hh) {
-                return OUTSIDE;
-            }
-        }
-
-        else if (position.distance_square(seg.end) <= hh) {
-                return INSIDE;
-        }
-        return CUTTING;
-    }
 
     // TODO questa cosa fa cagare, ma non so come altro segnalare "non ho trovato"
     const Point error_point = Point(MAXFLOAT, MAXFLOAT);
@@ -117,8 +104,8 @@ private:
     }
 
     Point next_in_segment(const Segment& seg) {
-        // std::vector<Point> intersects = segment_intersections(seg);
-        std::vector<Point> intersects = seg.circle_intersections(position, horizon);
+        std::vector<Point> intersects = segment_intersections(seg);
+        // std::vector<Point> intersects = seg.circle_intersections(position, horizon);
         switch(intersects.size()) {
         case 1:
             return intersects[0];
@@ -129,80 +116,63 @@ private:
         }
     }
     Point next_in_path() {
-        auto next_ind=[this](const int i) {
+        const auto next_index=[this](const int i) {
             return (i+1)%path.size();
         };
 
-        auto does_segment_cut = [this](const Segment s) {
-          return position.distance(s.start) <= horizon
-              && position.distance(s.end) >= horizon;
+        const auto prev_index=[this](const int i) {
+            return (i-1+path.size())%path.size();
         };
 
-        for(int i = this->last_visited, n_visited = 0; n_visited != path.size(); i = next_ind(i), ++n_visited)
+        const int initial_last_visited = last_visited;
+
+        Point goal_candidate = error_point; // valore iniziale a cazzo
+        for(int i = initial_last_visited ;
+            i != prev_index(initial_last_visited) ;
+            i = next_index(i))
             {   
-                Segment segment = Segment(path[i], path[next_ind(i)]);
-                switch (segment_intersect_status(segment)) {
-                case INSIDE:
-                    // vai avanti e cerca qualcosa che intersechi
-                    printerr_segment("segment ", segment, " inside the circle");
-                    continue;
+                Segment segment = Segment(path[i], path[next_index(i)]);
+                // il verso segment.start, segment.end è usato localmente come nozione di "in avanti"
+                goal_candidate = next_in_segment(segment);
+                bool intersect_found = is_valid_point(goal_candidate);
 
-                case OUTSIDE:
-                    // la ricerca non può fare troppa roba in questo caso, prendi il primo vertice 
-                    printerr_segment("segment ", segment, " outside the circle");
-                    return path[last_visited];
-
-                case CUTTING:
-                    printerr_segment("segment ", segment, " cuts the circle");
-                    Point goal = next_in_segment(segment);
-                    printerr_point("instersection is : ", goal);
-                    if (is_valid_point(goal)
-                        && segment.end.is_closer(goal, position)) {
-                        std::cerr<<"point is not fucked"<<std::endl;
-                        last_visited = i;
-                        return goal;
-                    }
-                    else {
-                        std::cerr<<"point is indeed fucked"<<std::endl;
-                        // prevent going backwards
-                        last_visited = i+1;
-                        continue;
-                    }
-                }
-            }
-        return error_point;
-    }
-
-    /*
-    Point goal_point() {
-        auto next_ind = [this](const int i) {return (i+1)%path.size();};
-
-        for (int i = this->last_visited, n_visited = 0; n_visited != path.size(); i = next_ind(i), ++n_visited) {
-            std::cerr<<"i : "<<i<<std::endl;
-            Segment segment = Segment(path[i], path[next_ind(i)]);
-            Point segment_goal = next_in_segment(segment);
-            if (is_valid_point(segment_goal)) {
-                // intersection found with segment
-                if (segment.end.is_closer(position, segment_goal)) {
-                    //this->last_visited = next_ind(i);
-                    std::cerr<<"case in which goal is behind the position"<<std::endl;
-                    continue;
+                // pick candidate
+                if (intersect_found) {
+                    std::cerr<<"intersect found"<<std::endl;
+                    printerr_point("goal point ",
+                                   goal_candidate,
+                                   " intersects the segment");
                 } else {
-                    std::cerr<<"trovato goal"<<std::endl;
-                    this->last_visited = i;
-                    return segment_goal;
+                    std::cerr<<"intersect NOT found"<<std::endl;
+                    printerr_point("goal point ",
+                                   goal_candidate,
+                                   " doesn't intersect the segment");
+                    printerr_point("trying to go back to the path, using segment start (",
+                                   segment.start ,
+                                   ") as goal candidate");
+                    last_visited = i;
+                    goal_candidate = segment.start;
+                    break;
                 }
-            } else {
-                // no intersection found with segment
-                this->last_visited = next_ind(this->last_visited);
-                return path[this->last_visited];
-            }
-        }
 
-        std::cerr<<"in the end : last found " << last_visited << std::endl;
-        return error_point;
+                // evaluate candidate
+                if (segment.end.is_closer_same_segment(goal_candidate, position)) {
+                    printerr_point("candidate point ",
+                                   goal_candidate,
+                                   " is good goal point, goes forward");
+                    last_visited = i;
+                    break; // will use candidate after the loop
+                } else {
+                    printerr_point("candidate point " ,
+                                   goal_candidate,
+                                   "is not a good point, goes backwards");
+                    // avoid going backwards, consider the next segment
+                    last_visited = next_index(i);
+                    continue;
+                }
+            }
+        return goal_candidate;
     }
-    */
 
     void wee_wee_move(const Point& goal) {
         position.x = (position.x + goal.x)/2;
@@ -219,6 +189,8 @@ private:
         printerr_point("goal : ", goal);
         std::cerr<< "horizon : " << horizon << std::endl;
         std::cerr<< "distance from goal : " << position.distance(goal) << std::endl;
+        std::cerr<< "last visited index : " << last_visited << std::endl;
+        printerr_point("path [last_visited] : ", path[last_visited]);
 #endif
     }
 
@@ -260,19 +232,18 @@ public:
 
     void wee_wee_path() {
         while(true) {
+#ifdef DEBUGGING
+            std::cerr<<"{{{ FRAME "<< frame_id << " TROVA PUNTI }}}"<<std::endl;
+#endif
             Point goal = next_in_path();
-            
 #ifdef DEBUGGING
-            int loop_id = 0;
+            std::cerr<<"{{{ FRAME "<< frame_id << " STATO MACCHINA }}}"<<std::endl;
 #endif
-            do {
+            print_status(goal);
+            wee_wee_move(goal);
 #ifdef DEBUGGING
-                std::cerr<<"{{{ LOOP STATUS "<< loop_id++ << "  }}}"<<std::endl;
-#endif
-                print_status(goal);
-                wee_wee_move(goal);
-            } while (!is_inside_radius(goal));
             std::cerr<<"{{{ FINE FRAME "<< frame_id++ << " }}}"<<std::endl;
+#endif
             std::cin.ignore(1);
         }
     }

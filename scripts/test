@@ -9,6 +9,7 @@ announce_starting_tests() {
 }
 
 cd pp_cpp/test
+mkdir bin
 (g++ -Wall -pedantic -g3 -o bin/test test.cpp) \
     && announce_starting_tests \
     && ./bin/test
