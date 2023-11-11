@@ -171,10 +171,10 @@ if __name__ == "__main__":
     plot = view.ControlView(traj[0], path_arr, show_old_pos=True)
     #set start position randomly near the first point
     start_pos = traj[0] + Point(np.random.uniform(-1, 1), np.random.uniform(-1, 1))
-    car = Robot(pos = start_pos, look_ahead = 6)
+    car = Robot(pos = start_pos, look_ahead = 2)
     stearing_angle = []
     old_pos = start_pos
-    for i in range(70):
+    for i in range(200):
         goal = car.next_point_in(traj)
         stearing_angle.append(car.stearing_angle(car.pos, goal))
         plot.refresh(start_pos, car.pos, goal, car.look_ahead)
