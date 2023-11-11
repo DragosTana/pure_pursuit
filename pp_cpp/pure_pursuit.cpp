@@ -41,7 +41,6 @@ private:
             (fabs(p.y) <= some_threshold);
     }
 
-
     Point next_in_segment(const Segment& seg) {
         // std::vector<Point> intersects = segment_intersections(seg, position, horizon);
         // std::vector<Point> intersects = seg.circle_intersections(position, horizon);
@@ -57,8 +56,8 @@ private:
     }
     Point next_in_path() {
         const auto next_index=[this](const int i) {
-            // return (i+1)%path.size();
-            return i+1;
+            return (i+1)%path.size();
+            // return i+1;
         };
 
         const auto prev_index=[this](const int i) {
@@ -69,7 +68,7 @@ private:
 
         Point goal_candidate = error_point; // valore iniziale a cazzo
         for(int i = initial_last_visited ;
-            i != prev_index(initial_last_visited) ;
+            i != (int)prev_index(initial_last_visited) ;
             i = next_index(i))
             {   
                 Segment segment = Segment(path[i], path[next_index(i)]);

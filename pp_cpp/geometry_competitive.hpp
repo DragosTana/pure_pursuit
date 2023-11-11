@@ -29,7 +29,6 @@ struct LineaCompetitiva {
     }
 };
 
-
 std::vector<Point> soluzioni_competitive(const LineaCompetitiva lc, double r) {
     // si assume circonferenza centrata in 0 0
     // lc va traslata prima di passarla a questa funzione
