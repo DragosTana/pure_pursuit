@@ -6,6 +6,18 @@
 #include<iostream>
 #include<limits>
 
+#define DEBUGGING
+
+int sign(int n) {
+  if (n) {
+      if(n > 0)
+        return 1;
+      else
+          return -1;
+  }
+  return 0;
+}
+
 bool in_range(double a, double ex1, double ex2) {
     // memento, (a <= b <= c) NON funziona in c++
     return ((ex1 <= a) && (a <= ex2)) || ((ex2 <= a) && (a <= ex1));
@@ -66,8 +78,8 @@ public:
 #define VERY_SMALL (0.0000000001)
 #define VERY_BIG   (10000000000)
 
-#define KINDA_SMALL (0.01)
-#define KINDA_BIG   (10)
+#define KINDA_SMALL (0.25)
+#define KINDA_BIG   (4)
 class Line {
 public:
     double m;
@@ -123,7 +135,16 @@ public:
     Line flip_su_bisettrice() const {
         // this ha i punti (0,q), (1, m+q), (2, 2m+q), eccetera
         // l'opposto passerà per gli inversi, quindi
-        return Line::from_points(Point(q,0), Point(m+q, 1));
+        return Line::from_points(Point(q, 0),
+                                 Point(m+q, 1));
+    }
+
+    Line trasla(double x0, double y0) const {
+        // sappiamo che 0,q e che 1, m+q sono nella linea originale
+        // quindi -x0,q-y0 e 1-x0, m+q-y0 sono nella linea traslata
+
+        return Line::from_points(Point(-x0, q - y0),
+                                 Point(1-x0, m+q-y0));
     }
 };
 
@@ -162,5 +183,90 @@ public:
         return res;
     }
 };
+
+void printerr_point(std::string preamble, const Point &p,
+                    std::string postamble="", bool endline=true) {
+    std::cerr << preamble
+              << p.x << "," << p.y
+              << postamble;
+    if(endline)
+        std::cerr<<std::endl;
+}
+
+void printerr_segment(std::string preamble, const Segment &s,
+                      std::string postamble="", bool endline=true) {
+    std::cerr << preamble
+              << s.start.x << "," << s.start.y
+              << " - "
+              << s.end.x<<","<<s.end.y
+              << postamble;
+    if(endline)
+        std::cerr<<std::endl;
+}
+
+std::vector<Point> segment_intersections(const Segment &seg,
+                                         const Point center,
+                                         const double radius) {
+    // questo codice è stato copiato e modificato
+    // dalla versoine python perchè sono una testa di cazzo
+    double x1_off = seg.start.x - center.x;
+    double y1_off = seg.start.y - center.y;
+    double x2_off = seg.end.x - center.x;
+    double y2_off = seg.end.y - center.y;
+
+    double dx = x2_off - x1_off;
+    double dy = y2_off - y1_off;
+
+    double dr = sqrt(pow(dx,2) + pow(dy,2));
+    double D = (x1_off*y2_off) - (x2_off*y1_off);
+    double discriminant = (pow(radius,2)) * pow(dr,2) - pow(D,2);
+
+    std::vector<Point>solutions = {};
+    if (discriminant >= 0) {
+        // compute line intersections
+        double sol_x1 =
+            ((D * dy) + (sign(dy) * dx * sqrt(discriminant)))
+            / pow(dr, 2);
+        double sol_x2 =
+            ((D * dy) - (sign(dy) * dx * sqrt(discriminant)))
+            / pow(dr,2);
+        double sol_y1 =
+            (-(D * dx) + fabs(dy) * sqrt(discriminant))
+            / pow(dr,2);
+        double sol_y2 =
+            (-(D * dx) - fabs(dy) * sqrt(discriminant))
+            / pow(dr,2);
+
+        Point sol1 = Point(sol_x1 + center.x, sol_y1 + center.y);
+        Point sol2 = Point(sol_x2 + center.x, sol_y2 + center.y);
+
+        // potrebbe non essere il non plus ultra dell'efficienza
+        // possibili altri metodi?
+
+        if (seg.point_in_rect(sol1)) {
+            solutions.push_back(sol1);
+        }
+        if (seg.point_in_rect(sol2)) {
+            solutions.push_back(sol2);      
+        }
+
+#ifdef DEBUGGING
+        printerr_segment("segment to intersect - ", seg);
+        printerr_point("solution 1 : ", sol1);
+        printerr_point("solution 2 : ", sol2);
+
+        std::cerr<<"intersects {";
+        if(solutions.size()) {
+            for (int i = 0; i < solutions.size(); ++i) {
+                printerr_point(" solutions[" + std::to_string(i) + "]=", solutions[i], "", false);
+            }
+        } else {
+            std::cerr << " none";
+        }
+        std::cerr<<" }"<<std::endl;
+#endif
+    }
+    return solutions;
+}
 
 #endif

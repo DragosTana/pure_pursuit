@@ -5,4 +5,4 @@ if [[ "$1" != "" ]]; then look_ahead="$1"; fi
 
 # non so quanto possa tornare utilizzare gdb come input per la visualizzazione
 # quindi preferirei evitare
-gdb -- args ./pp_cpp/bin/pp waypoints.csv "$look_ahead" 1
+gdb --args ./pp_cpp/bin/pp waypoints.csv "$look_ahead" 1

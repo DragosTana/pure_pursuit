@@ -3,4 +3,9 @@
 look_ahead="6"
 if [[ "$1" != "" ]]; then look_ahead="$1"; fi
 
-./pp_cpp/bin/pp waypoints.csv "$look_ahead" 1
+ignored="0"
+if [[ "$2" != "" ]]; then ignored="$2"; fi
+
+wheel_base="1"
+
+./pp_cpp/bin/pp waypoints.csv "$look_ahead" "$wheel_base" "$ignored"

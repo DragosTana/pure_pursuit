@@ -1,0 +1,65 @@
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <quel cazzo di vertice> 
+c.distance(intersects[0]) is not equal to r
+c.distance(intersects[0]) is <3.56648> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <quel cazzo di vertice> 
+intersects[0].distance(c) is not equal to r
+intersects[0].distance(c) is <3.56648> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <quel cazzo di vertice> 
+c.distance(intersects[1]) is not equal to r
+c.distance(intersects[1]) is <5.4594> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <quel cazzo di vertice> 
+intersects[1].distance(c) is not equal to r
+intersects[1].distance(c) is <5.4594> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <segment circle intersects> 
+intersects[0].x is not equal to 20.90711
+intersects[0].x is <18.4649> -- 20.90711 is <20.9071>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <segment circle intersects> 
+intersects[0].y is not equal to 92.25912
+intersects[0].y is <92.0791> -- 92.25912 is <92.2591>
+got here
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <segment circle intersects> 
+c.distance(intersects[0]) is not equal to r
+c.distance(intersects[0]) is <3.56648> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <segment circle intersects> 
+intersects[0].distance(c) is not equal to r
+intersects[0].distance(c) is <3.56648> -- r is <6>
+
+in test case <guarda guarda sto segmento del cazzo che non fa niente>
+in test suite <the cooler segment circle intersects> 
+intersects.size() is not equal to 1
+intersects.size() is <0> -- 1 is <1>
+got here
+
+in test case <base interseca due punti>
+in test suite <the malato 1 segment circle intersects> 
+intersects.size() is not equal to 2
+intersects.size() is <1> -- 2 is <2>
+
+in test case <base non interseca>
+in test suite <the malato 1 segment circle intersects> 
+intersects.size() is not equal to 0
+intersects.size() is <1> -- 0 is <0>
+
+in test case <verticaloso interseca due punti>
+in test suite <the malato 1 segment circle intersects> 
+intersects.size() is not equal to 2
+intersects.size() is <1> -- 2 is <2>
+
+se non è esploso niente allora passato tutto
+se è esploso qualcosa credo che tu l'abbia già visto
