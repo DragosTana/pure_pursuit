@@ -118,6 +118,15 @@ private:
     void wee_wee_move(const Point& goal) {
         position.x = (position.x + goal.x)/2;
         position.y = (position.y + goal.y)/2;
+
+        //double direction_x = goal.x - position.x;
+        //double direction_y = goal.y - position.y;
+
+        //double vers_direction_x = direction_x / sqrt(direction_x*direction_x + direction_y*direction_y);
+        //double vers_direction_y = direction_y / sqrt(direction_x*direction_x + direction_y*direction_y);
+
+        //position.x += vers_direction_x * 2;
+        //position.y += vers_direction_y * 2;
     }
 
     void print_status(Point goal) {
