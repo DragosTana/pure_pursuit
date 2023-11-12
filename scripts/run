@@ -9,4 +9,4 @@ if [[ "$2" != "" ]]; then ignored="$2"; fi
 wheel_base="1"
 
 ./pp_cpp/bin/pp waypoints.csv "$look_ahead" "$wheel_base" "$ignored" |\
-    python ./pp_python/cpp_visualization.py
+    python3 ./pp_python/cpp_visualization.py

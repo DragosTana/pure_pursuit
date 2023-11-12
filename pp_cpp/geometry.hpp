@@ -257,7 +257,7 @@ std::vector<Point> segment_intersections(const Segment &seg,
 
         std::cerr<<"intersects {";
         if(solutions.size()) {
-            for (int i = 0; i < solutions.size(); ++i) {
+            for (int i = 0; i < (int)solutions.size(); ++i) {
                 printerr_point(" solutions[" + std::to_string(i) + "]=", solutions[i], "", false);
             }
         } else {
