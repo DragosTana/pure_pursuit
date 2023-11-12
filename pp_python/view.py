@@ -68,7 +68,7 @@ class ControlView():
             plotStart = self.ax.plot(start_x, start_y, 'o',markersize = 10 , color = "black")[0]
         
         if self.show_old_pos:
-            position = position[-10:]
+            self.old_pos = self.old_pos[-10:]
             plot_old_pos = self.ax.plot(position.x, position.y, '.',markersize = 10 , color = "blue")[0]
         
         plot_pos = self.ax.plot(position.x, position.y, 'o',markersize = 10 , color = "green")[0] 
