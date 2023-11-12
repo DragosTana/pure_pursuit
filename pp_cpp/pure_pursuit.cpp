@@ -57,8 +57,7 @@ private:
     }
     Point next_in_path() {
         const auto next_index=[this](const int i) {
-            // return (i+1)%path.size();
-            return i+1;
+            return (i+1)%path.size();
         };
 
         const auto prev_index=[this](const int i) {
@@ -173,7 +172,7 @@ public:
     void wee_wee_path(int ignored) {
         for(int i = 0; i<ignored; ++i) {
             wee_wee_step();
-            std::this_thread::sleep_for(std::chrono::milliseconds(150));
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
         }
                     
         while(true) {
