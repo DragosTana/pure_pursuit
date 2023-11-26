@@ -3,43 +3,48 @@
 #include <jsoncpp/json/value.h>
 #include <fstream>
 #include <string>
-/*
-    PID Controller
-    
-    TODO: 
+#include <math.h>
 
-        1. Implement anti-windup on integral term -- FATTOOO 
-        2. Implement derivative on measurement
-        3. Implemete low pass filter on derivative term  --> IL TAU sarà due volte la frequenza di campionamento
-*/
-#define DEBUG 1
+#define DEBUG 0
 
-PIDController::PIDController(double kp, double ki, double kd, double min_output, double max_output) :
+// PID controller constructor
+PIDController::PIDController(double kp, double ki, double kd, double min_output, double max_output, double low_pass_cutoff_hz) :
     kp_(kp),
     ki_(ki),
     kd_(kd),
     min_output_(min_output),
     max_output_(max_output),
+    low_pass_cutoff_hz_(low_pass_cutoff_hz),
     integral_(0),
     previous_error_(0),
+    previous_time_(0),
+    previous_derivative_(0),
     antiwindup_(false) {}
 
-double PIDController::Calculate(double setpoint, double current_value) {
-    double error = setpoint - current_value;
-    double output = 0.0;
-    double derivative = (error - previous_error_);
+double PIDController::calculate(double setpoint, double current_value) {
 
-    if (antiwindup_ == false) {
-        integral_ += error;
-        output = kp_ * error + ki_ * integral_ + kd_ * derivative;
-    } else {
-        output = kp_ * error + kd_ * derivative;
-        antiwindup_ = false;
-    }
+    double error = setpoint - current_value;
+    unsigned long int current_time = nanos();
+    double dt = (current_time - previous_time_) / 1e9; 
+    double RC = 1.0 / (2.0 * M_PI * low_pass_cutoff_hz_); 
+    double output = 0.0;
+    
+    // Calculate the derivative term with a low-pass filter of first order
+    double derivative = (error - previous_error_) / dt;
+    derivative = previous_derivative_ + (dt/(RC + dt)) * (derivative - previous_derivative_); 
+
+    if (!antiwindup_) {
+    integral_ += error * dt;
+    } 
+    output = (!antiwindup_) ? (kp_ * error + ki_ * integral_ + kd_ * derivative) : (kp_ * error + kd_ * derivative);
 
     double clamped_output = clamping(output);
     bool antiwindup_ = antiwindup(output, clamped_output, error);
+
+    // Update state variables for the next iteration
     previous_error_ = error;
+    previous_time_ = current_time;
+    previous_derivative_ = derivative;
 
 #ifdef DEBUG
     std::cerr << "======================================" << std::endl;
@@ -53,17 +58,15 @@ double PIDController::Calculate(double setpoint, double current_value) {
 }
 
 double PIDController::clamping(double output) {
-    if (output > max_output_) {
-        output = max_output_;
-    } else if (output < min_output_) {
-        output = min_output_;
-    }
-    return output;
+    return (output > max_output_) ? max_output_ : ((output < min_output_) ? min_output_ : output);
 }
 
 bool PIDController::antiwindup(double output, double clamped_output, double error) {
-    if ((clamped_output != output) && (error * output > 0)) {
-        return true;
-    }
-    return false;
+    return (clamped_output != output) && (error * output > 0);
+}
+
+unsigned long int nanos() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (unsigned long int)ts.tv_sec * 1000000000 + ts.tv_nsec;
 }

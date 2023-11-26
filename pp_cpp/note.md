@@ -1,2 +1,0 @@
- - con look ahead abbastanza grossi finisce col mancare ogni segmento e diventare un vertex chaser
- - 

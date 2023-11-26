@@ -1,13 +1,8 @@
-{"kp": "0.1", "kd": "0.1", "ki": "0.1", "max_output": "10", "min_output": "10"}
 
-    // #include <json.h>
-    // #include <fstream>
-
-   //std::ifstream parameters("parameters.json", std::ifstream::binary);
-    //Json::Value param;
-    //parameters >> param;
-    //double kp = param["kp"]
-    //double ki = param["ki"];
-    //double kd = param["kd"];
-    //double min_output = param["min_output"];
-    //double max_output = param["max_output"];
+// PID parameters
+{"kp": "1", 
+"kd": "0.01",
+"ki": "0.1",
+"max_output": "10",
+"min_output": "-10",
+"low_pass_cutoff_hz": "10" }
